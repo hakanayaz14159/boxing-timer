@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import favicon from '$lib/assets/favicon.svg';
 	import { onMount } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
@@ -25,6 +26,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<link rel="apple-touch-icon" href={`${base}/icons/icon-180.png`} />
 	{#if pwaInfo?.webManifest?.linkTag}
 		{@html pwaInfo.webManifest.linkTag}
 	{/if}
