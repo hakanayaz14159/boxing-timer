@@ -15,15 +15,6 @@
 		return '';
 	});
 
-	const phaseLabel = $derived.by(() => {
-		const phase = timerStore.phase;
-		if (phase === 'exercise') return 'Exercise';
-		if (phase === 'rest') return 'Rest';
-		if (phase === 'countdown') return 'Get Ready';
-		if (phase === 'finished') return 'Workout Complete';
-		return '';
-	});
-
 	const isPaused = $derived(timerStore.isPaused);
 	const showPaused = $derived(
 		isPaused && (timerStore.phase === 'exercise' || timerStore.phase === 'rest')
@@ -34,13 +25,7 @@
 	{#if showPaused}
 		<span class="paused-badge" aria-live="polite">Paused</span>
 	{/if}
-	{#if phaseLabel}
-		<span class="phase-label">{phaseLabel}</span>
-	{/if}
 	<span class="display">{displayText}</span>
-	{#if timerStore.phase === 'exercise' || timerStore.phase === 'rest'}
-		<span class="round">Round {timerStore.currentRound} / {timerStore.activeConfig.rounds}</span>
-	{/if}
 </div>
 
 <style>
@@ -50,52 +35,34 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		flex: 1;
+		width: 100%;
+		height: 100%;
 		min-height: 0;
-		gap: 0.5rem;
 		text-align: center;
-		padding: 1rem;
-	}
-
-	.phase-label {
-		font-size: clamp(0.875rem, 3vw, 1.25rem);
-		color: var(--color-text-muted, #666);
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
+		padding: 0.5rem;
 	}
 
 	.display {
-		font-size: clamp(3rem, min(20vw, 15vh), 12rem);
+		font-size: clamp(5rem, min(45vw, 60vh), 30rem);
 		font-weight: 700;
 		line-height: 1;
 		color: var(--color-text, #111);
 		font-family: var(--font-display, system-ui, sans-serif);
 	}
 
-	.round {
-		font-size: clamp(1.5rem, 6vw, 3.5rem);
-		font-weight: 700;
-		font-family: var(--font-display, system-ui, sans-serif);
-		color: var(--color-text);
-		letter-spacing: 0.02em;
+	@media (max-width: 640px) and (orientation: portrait) {
+		.display {
+			font-size: clamp(6rem, min(55vw, 65vh), 32rem);
+		}
 	}
 
 	@media (orientation: landscape) and (max-height: 500px) {
 		.countdown {
-			gap: 0.25rem;
-			padding: 0.5rem;
-		}
-
-		.phase-label {
-			font-size: 0.75rem;
+			padding: 0.25rem;
 		}
 
 		.display {
-			font-size: clamp(4rem, min(25vw, 22vh), 12rem);
-		}
-
-		.round {
-			font-size: 0.875rem;
+			font-size: clamp(6rem, min(50vw, 75vh), 35rem);
 		}
 
 		.paused-badge {
@@ -105,6 +72,10 @@
 	}
 
 	.paused-badge {
+		position: absolute;
+		top: 0.5rem;
+		left: 50%;
+		transform: translateX(-50%);
 		padding: 0.5rem 1rem;
 		font-size: clamp(1rem, 4vw, 1.375rem);
 		font-weight: 700;

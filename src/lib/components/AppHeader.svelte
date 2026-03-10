@@ -2,8 +2,8 @@
 	import { GITHUB_REPO_URL } from '$lib/constants';
 </script>
 
-<header class="header">
-	<h1 class="title">Boxing Timer</h1>
+<div class="top-bar">
+	<span class="title">Boxing Timer</span>
 	<a
 		href={GITHUB_REPO_URL}
 		target="_blank"
@@ -25,11 +25,11 @@
 			/>
 		</svg>
 	</a>
-</header>
+</div>
 
 <style>
-	.header {
-		position: fixed;
+	.top-bar {
+		position: absolute;
 		top: 0;
 		left: 0;
 		right: 0;
@@ -38,13 +38,16 @@
 		justify-content: space-between;
 		padding: 1rem 1.5rem;
 		padding-top: calc(1rem + env(safe-area-inset-top, 0));
-		background: var(--color-bg);
-		border-bottom: 1px solid var(--color-border);
 		z-index: 10;
+		pointer-events: none;
+	}
+
+	.top-bar > * {
+		pointer-events: auto;
 	}
 
 	@media (orientation: landscape) and (max-height: 500px) {
-		.header {
+		.top-bar {
 			padding: 0.5rem 1rem;
 			padding-top: calc(0.5rem + env(safe-area-inset-top, 0));
 		}
