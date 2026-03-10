@@ -372,71 +372,75 @@
 
 	@media (orientation: landscape) and (max-height: 500px) {
 		.config-wrapper.tabbed .tabs .tab-btn {
-			min-height: 32px;
+			min-height: 36px;
 			padding: 0.25rem 0.5rem;
 			font-size: 0.75rem;
 		}
 
 		.config-wrapper.tabbed .tab-panels {
-			padding: 0.5rem 8px 0.5rem;
+			padding: 0.25rem 8px 0;
 			overflow: hidden;
 		}
 
 		.config-wrapper.tabbed .presets-grid {
-			gap: 0.25rem;
+			gap: 0.375rem;
 		}
 
 		.config-wrapper.tabbed .presets-grid .preset-btn {
-			min-height: 32px;
-			padding: 0.25rem 0.375rem;
-			font-size: 0.75rem;
+			min-height: 40px;
+			padding: 0.375rem 0.5rem;
+			font-size: 0.8125rem;
 		}
 
 		.config-wrapper.tabbed .config-form {
-			gap: 0.5rem;
+			gap: 0.375rem;
 		}
 
 		.config-wrapper.tabbed .field {
-			gap: 0.25rem;
+			gap: 0.125rem;
 		}
 
 		.config-wrapper.tabbed .field label,
 		.config-wrapper.tabbed .value {
-			font-size: 0.8125rem;
+			font-size: 0.75rem;
 		}
 
 		.config-wrapper.tabbed .range-labels {
-			font-size: 0.6875rem;
+			font-size: 0.625rem;
 		}
 
 		.config-wrapper.tabbed input[type='range'] {
-			height: 6px;
+			height: 5px;
 		}
 
 		.config-wrapper.tabbed input[type='range']::-webkit-slider-thumb {
-			width: 16px;
-			height: 16px;
+			width: 14px;
+			height: 14px;
 		}
 
 		.config-wrapper.tabbed input[type='range']::-moz-range-thumb {
-			width: 16px;
-			height: 16px;
+			width: 14px;
+			height: 14px;
+		}
+
+		.config-wrapper.tabbed .stepper {
+			padding: 0.125rem;
 		}
 
 		.config-wrapper.tabbed .stepper-btn {
-			flex: 0 0 32px;
-			height: 32px;
-			font-size: 1.25rem;
+			flex: 0 0 28px;
+			height: 28px;
+			font-size: 1.125rem;
 		}
 
 		.config-wrapper.tabbed .stepper-value {
-			font-size: 1rem;
+			font-size: 0.875rem;
 		}
 
 		.config-wrapper.tabbed .preview-btn {
-			min-height: 28px;
-			padding: 0.25rem 0.5rem;
-			font-size: 0.75rem;
+			min-height: 24px;
+			padding: 0.2rem 0.4rem;
+			font-size: 0.6875rem;
 		}
 	}
 

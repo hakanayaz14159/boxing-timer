@@ -246,7 +246,7 @@
 
 		.page.countdown-layout,
 		.page.config-layout {
-			padding: calc(0.5rem + env(safe-area-inset-top, 0)) 1rem calc(0.5rem + env(safe-area-inset-bottom, 0));
+			padding: calc(0.5rem + env(safe-area-inset-top, 0)) 1rem calc(0.25rem + env(safe-area-inset-bottom, 0));
 		}
 
 		.countdown-split {
@@ -256,9 +256,8 @@
 		}
 
 		.config-split {
-			flex-direction: row;
-			gap: 0.5rem;
-			align-items: stretch;
+			flex-direction: column;
+			gap: 0.125rem;
 		}
 
 		.config-left {
@@ -272,7 +271,9 @@
 
 		.config-right {
 			flex-shrink: 0;
-			justify-content: center;
+			width: 100%;
+			flex-direction: row;
+			justify-content: stretch;
 		}
 
 		.countdown-left,
@@ -290,13 +291,16 @@
 		}
 
 		.config-right :global(.controls) {
+			width: 100%;
 			max-width: none;
-			flex-direction: column;
+			flex-direction: row;
+			justify-content: stretch;
 		}
 
 		.config-right :global(.btn-primary) {
-			min-height: 56px;
-			font-size: 1.25rem;
+			flex: 1;
+			min-height: 44px;
+			font-size: 1.125rem;
 		}
 	}
 
