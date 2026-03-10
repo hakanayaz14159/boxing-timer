@@ -19,13 +19,16 @@
 	const showPaused = $derived(
 		isPaused && (timerStore.phase === 'exercise' || timerStore.phase === 'rest')
 	);
+
+	/** Long text (Start, Done) needs smaller font to fit; digits use large font for readability */
+	const isLongText = $derived(displayText === 'Start' || displayText === 'Done');
 </script>
 
 <div class="countdown" aria-live="polite" aria-atomic="true">
 	{#if showPaused}
 		<span class="paused-badge" aria-live="polite">Paused</span>
 	{/if}
-	<span class="display">{displayText}</span>
+	<span class="display" class:display--long={isLongText}>{displayText}</span>
 </div>
 
 <style>
@@ -45,13 +48,18 @@
 		container-name: countdown;
 	}
 
-	/* Size from container so "Start" (5 chars) fits. Monospace ~0.6em/char => 5 chars ≈ 3em => font-size = 33cqw for full width */
+	/* Large font for digits (3, 2, 1) and numbers (up to 3 digits) – readable from distance */
 	.display {
-		font-size: min(20cqw, 28cqh);
+		font-size: min(32cqw, 42cqh);
 		font-weight: 700;
 		line-height: 1;
 		color: var(--color-text, #111);
 		font-family: var(--font-display, system-ui, sans-serif);
+	}
+
+	/* Smaller font for "Start"/"Done" so they fit without overflow */
+	.display.display--long {
+		font-size: min(18cqw, 25cqh);
 	}
 
 	@media (orientation: landscape) and (max-height: 500px) {
@@ -60,7 +68,11 @@
 		}
 
 		.display {
-			font-size: min(18cqw, 25cqh);
+			font-size: min(36cqw, 50cqh);
+		}
+
+		.display.display--long {
+			font-size: min(16cqw, 22cqh);
 		}
 
 		.paused-badge {
