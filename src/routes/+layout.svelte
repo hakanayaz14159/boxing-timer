@@ -2,9 +2,20 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { onMount } from 'svelte';
 	import { pwaInfo } from 'virtual:pwa-info';
+	import { timerStore } from '$lib/stores/timer.svelte';
+	import { setWakeLock, ensureVisibilityHandler } from '$lib/services/wakeLock';
 	import '../app.css';
 
 	let { children } = $props();
+
+	$effect(() => {
+		const phase = timerStore.phase;
+		const isPaused = timerStore.isPaused;
+		const shouldHold =
+			(phase === 'countdown' || phase === 'exercise' || phase === 'rest') && !isPaused;
+		ensureVisibilityHandler();
+		setWakeLock(shouldHold);
+	});
 
 	onMount(async () => {
 		if (pwaInfo) {
