@@ -1,4 +1,23 @@
+import boxBellUrl from '$lib/assets/box_bell.mp3?url';
+
+/**
+ * Boxing bell segments in box_bell.mp3:
+ * - 1 bell: 00:00 (round end)
+ * - 2 bells: 00:09 (reserved)
+ * - 3 bells: 00:17 (workout complete)
+ * Play duration: 5 seconds from each start point.
+ */
+export type BellSignal = 'round_end' | 'workout_complete';
+
+const BELL_OFFSETS: Record<BellSignal, number> = {
+	round_end: 0, // 1 bell at 00:00
+	workout_complete: 17 // 3 bells at 00:17
+};
+
+const PLAY_DURATION = 5;
+
 let audioContext: AudioContext | null = null;
+let audioBuffer: AudioBuffer | null = null;
 
 function getAudioContext(): AudioContext {
 	if (!audioContext) {
@@ -7,23 +26,25 @@ function getAudioContext(): AudioContext {
 	return audioContext;
 }
 
-export async function playBeep(): Promise<void> {
+async function loadAudioBuffer(ctx: AudioContext): Promise<AudioBuffer> {
+	if (audioBuffer) return audioBuffer;
+	const response = await fetch(boxBellUrl);
+	const arrayBuffer = await response.arrayBuffer();
+	audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+	return audioBuffer;
+}
+
+export async function playAlarm(signal: BellSignal): Promise<void> {
 	const ctx = getAudioContext();
 	if (ctx.state === 'suspended') {
 		await ctx.resume();
 	}
 
-	const oscillator = ctx.createOscillator();
-	const gain = ctx.createGain();
+	const buffer = await loadAudioBuffer(ctx);
+	const offset = BELL_OFFSETS[signal];
 
-	oscillator.type = 'sine';
-	oscillator.frequency.setValueAtTime(800, ctx.currentTime);
-	oscillator.connect(gain);
-	gain.connect(ctx.destination);
-
-	gain.gain.setValueAtTime(0.3, ctx.currentTime);
-	gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-
-	oscillator.start(ctx.currentTime);
-	oscillator.stop(ctx.currentTime + 0.3);
+	const source = ctx.createBufferSource();
+	source.buffer = buffer;
+	source.connect(ctx.destination);
+	source.start(ctx.currentTime, offset, Math.min(PLAY_DURATION, buffer.duration - offset));
 }

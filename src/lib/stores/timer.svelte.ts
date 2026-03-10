@@ -1,6 +1,7 @@
-import type { TimerPhase } from '$lib/types/timer';
+import type { Config, TimerPhase, WorkoutConfig } from '$lib/types/timer';
 import { configStore } from './config.svelte';
-import { playBeep } from '$lib/services/sound';
+import type { BellSignal } from '$lib/services/sound';
+import { playAlarm } from '$lib/services/sound';
 
 const COUNTDOWN_STEPS: (number | 'Start')[] = [3, 2, 1, 'Start'];
 
@@ -10,6 +11,13 @@ function createTimerStore() {
 	let remainingSeconds = $state(0);
 	let isPaused = $state(false);
 	let countdownStepIndex = $state(0);
+
+	/** Config for current workout; when set (preset), overrides configStore. Cleared on reset. */
+	let activeConfig: WorkoutConfig | null = null;
+
+	function getConfig(): WorkoutConfig {
+		return activeConfig ?? configStore.value;
+	}
 
 	const TICK_MS = 1000;
 	const COUNTDOWN_TICK_MS = 1000; // 3-2-1 countdown: 1s per number
@@ -48,20 +56,22 @@ function createTimerStore() {
 			} else {
 				phase = 'exercise';
 				currentRound = 1;
-				remainingSeconds = configStore.value.exerciseSeconds;
+				remainingSeconds = getConfig().exerciseSeconds;
 				scheduleTick();
 			}
 			return;
 		}
 
 		if (phase === 'exercise') {
-			playBeep();
-			if (currentRound >= configStore.value.rounds) {
+			const signal: BellSignal =
+				currentRound >= getConfig().rounds ? 'workout_complete' : 'round_end';
+			playAlarm(signal);
+			if (currentRound >= getConfig().rounds) {
 				phase = 'finished';
 				return;
 			}
 			phase = 'rest';
-			remainingSeconds = configStore.value.restSeconds;
+			remainingSeconds = getConfig().restSeconds;
 			scheduleTick();
 			return;
 		}
@@ -69,7 +79,7 @@ function createTimerStore() {
 		if (phase === 'rest') {
 			currentRound++;
 			phase = 'exercise';
-			remainingSeconds = configStore.value.exerciseSeconds;
+			remainingSeconds = getConfig().exerciseSeconds;
 			scheduleTick();
 		}
 	}
@@ -93,8 +103,12 @@ function createTimerStore() {
 		get countdownDisplay(): number | 'Start' {
 			return COUNTDOWN_STEPS[countdownStepIndex];
 		},
-		start() {
+		get activeConfig(): WorkoutConfig {
+			return getConfig();
+		},
+		start(config?: WorkoutConfig) {
 			clearTimer();
+			activeConfig = config ?? null;
 			phase = 'countdown';
 			currentRound = 0;
 			countdownStepIndex = 0;
@@ -121,6 +135,7 @@ function createTimerStore() {
 		},
 		reset() {
 			clearTimer();
+			activeConfig = null;
 			phase = 'config';
 			currentRound = 0;
 			remainingSeconds = 0;

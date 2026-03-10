@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { timerStore } from '$lib/stores/timer.svelte';
-	import { configStore } from '$lib/stores/config.svelte';
 
 	const displayText = $derived.by(() => {
 		const phase = timerStore.phase;
@@ -32,7 +31,7 @@
 	{/if}
 	<span class="display">{displayText}</span>
 	{#if timerStore.phase === 'exercise' || timerStore.phase === 'rest'}
-		<span class="round">Round {timerStore.currentRound} / {configStore.value.rounds}</span>
+		<span class="round">Round {timerStore.currentRound} / {timerStore.activeConfig.rounds}</span>
 	{/if}
 </div>
 

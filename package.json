@@ -2,6 +2,7 @@
 	"name": "box-timer",
 	"private": true,
 	"version": "0.0.1",
+	"description": "Boxing interval timer SPA",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
