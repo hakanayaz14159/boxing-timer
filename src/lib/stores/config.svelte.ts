@@ -23,25 +23,38 @@ function clamp(value: number, min: number, max: number): number {
 	return Math.min(Math.max(value, min), max);
 }
 
+function safeNumber(value: unknown, fallback: number): number {
+	const n = Number(value);
+	return Number.isFinite(n) ? n : fallback;
+}
+
+/** Normalizes partial or full config into a valid Config with clamped values. */
+function normalizeConfig(raw: Partial<Config>): Config {
+	return {
+		exerciseSeconds: clamp(
+			safeNumber(raw.exerciseSeconds, DEFAULTS.exerciseSeconds),
+			LIMITS.exerciseSeconds.min,
+			LIMITS.exerciseSeconds.max
+		),
+		restSeconds: clamp(
+			safeNumber(raw.restSeconds, DEFAULTS.restSeconds),
+			LIMITS.restSeconds.min,
+			LIMITS.restSeconds.max
+		),
+		rounds: clamp(safeNumber(raw.rounds, DEFAULTS.rounds), LIMITS.rounds.min, LIMITS.rounds.max)
+	};
+}
+
 function loadFromStorage(): Config {
 	if (!browser) return { ...DEFAULTS };
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY);
 		if (!raw) return { ...DEFAULTS };
-		const parsed = JSON.parse(raw) as Partial<Config>;
-		return {
-			exerciseSeconds: clamp(
-				Number(parsed.exerciseSeconds ?? DEFAULTS.exerciseSeconds),
-				LIMITS.exerciseSeconds.min,
-				LIMITS.exerciseSeconds.max
-			),
-			restSeconds: clamp(
-				Number(parsed.restSeconds ?? DEFAULTS.restSeconds),
-				LIMITS.restSeconds.min,
-				LIMITS.restSeconds.max
-			),
-			rounds: clamp(Number(parsed.rounds ?? DEFAULTS.rounds), LIMITS.rounds.min, LIMITS.rounds.max)
-		};
+		const parsed: unknown = JSON.parse(raw);
+		if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+			return { ...DEFAULTS };
+		}
+		return normalizeConfig(parsed as Partial<Config>);
 	} catch {
 		return { ...DEFAULTS };
 	}
@@ -64,15 +77,7 @@ function createConfigStore() {
 			return config;
 		},
 		set(value: Config) {
-			config = {
-				exerciseSeconds: clamp(
-					value.exerciseSeconds,
-					LIMITS.exerciseSeconds.min,
-					LIMITS.exerciseSeconds.max
-				),
-				restSeconds: clamp(value.restSeconds, LIMITS.restSeconds.min, LIMITS.restSeconds.max),
-				rounds: clamp(value.rounds, LIMITS.rounds.min, LIMITS.rounds.max)
-			};
+			config = normalizeConfig(value);
 			saveToStorage(config);
 		},
 		update(partial: Partial<Config>) {

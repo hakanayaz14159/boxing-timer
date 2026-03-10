@@ -1,4 +1,4 @@
-export type TimerPhase = 'config' | 'ready' | 'countdown' | 'exercise' | 'rest' | 'finished';
+export type TimerPhase = 'config' | 'countdown' | 'exercise' | 'rest' | 'finished';
 
 export interface WorkoutConfig {
 	exerciseSeconds: number;
@@ -6,7 +6,7 @@ export interface WorkoutConfig {
 	rounds: number;
 }
 
-export interface Config extends WorkoutConfig {}
+export type Config = WorkoutConfig;
 
 export interface TimerState {
 	phase: TimerPhase;

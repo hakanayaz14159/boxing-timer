@@ -38,22 +38,20 @@
 		width: 100%;
 		height: 100%;
 		min-height: 0;
+		min-width: 0;
 		text-align: center;
 		padding: 0.5rem;
+		container-type: size;
+		container-name: countdown;
 	}
 
+	/* Size from container so "Start" (5 chars) fits. Monospace ~0.6em/char => 5 chars ≈ 3em => font-size = 33cqw for full width */
 	.display {
-		font-size: clamp(5rem, min(45vw, 60vh), 30rem);
+		font-size: min(20cqw, 28cqh);
 		font-weight: 700;
 		line-height: 1;
 		color: var(--color-text, #111);
 		font-family: var(--font-display, system-ui, sans-serif);
-	}
-
-	@media (max-width: 640px) and (orientation: portrait) {
-		.display {
-			font-size: clamp(6rem, min(55vw, 65vh), 32rem);
-		}
 	}
 
 	@media (orientation: landscape) and (max-height: 500px) {
@@ -62,7 +60,7 @@
 		}
 
 		.display {
-			font-size: clamp(6rem, min(50vw, 75vh), 35rem);
+			font-size: min(18cqw, 25cqh);
 		}
 
 		.paused-badge {

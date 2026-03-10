@@ -34,17 +34,25 @@ async function loadAudioBuffer(ctx: AudioContext): Promise<AudioBuffer> {
 	return audioBuffer;
 }
 
+/**
+ * Plays the alarm sound for the given signal. Handles errors internally to avoid
+ * unhandled promise rejections when called fire-and-forget.
+ */
 export async function playAlarm(signal: BellSignal): Promise<void> {
-	const ctx = getAudioContext();
-	if (ctx.state === 'suspended') {
-		await ctx.resume();
+	try {
+		const ctx = getAudioContext();
+		if (ctx.state === 'suspended') {
+			await ctx.resume();
+		}
+
+		const buffer = await loadAudioBuffer(ctx);
+		const offset = BELL_OFFSETS[signal];
+
+		const source = ctx.createBufferSource();
+		source.buffer = buffer;
+		source.connect(ctx.destination);
+		source.start(ctx.currentTime, offset, Math.min(PLAY_DURATION, buffer.duration - offset));
+	} catch (err) {
+		console.warn('[sound] Failed to play alarm:', err);
 	}
-
-	const buffer = await loadAudioBuffer(ctx);
-	const offset = BELL_OFFSETS[signal];
-
-	const source = ctx.createBufferSource();
-	source.buffer = buffer;
-	source.connect(ctx.destination);
-	source.start(ctx.currentTime, offset, Math.min(PLAY_DURATION, buffer.duration - offset));
 }

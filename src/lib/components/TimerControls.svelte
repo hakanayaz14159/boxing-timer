@@ -4,7 +4,7 @@
 	const phase = $derived(timerStore.phase);
 	const isPaused = $derived(timerStore.isPaused);
 
-	const canStart = $derived(phase === 'config' || phase === 'ready');
+	const canStart = $derived(phase === 'config');
 	const canPauseResume = $derived(phase === 'exercise' || phase === 'rest');
 	const canReset = $derived(
 		phase === 'countdown' || phase === 'exercise' || phase === 'rest' || phase === 'finished'

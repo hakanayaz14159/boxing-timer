@@ -14,7 +14,7 @@
 	let tabPanelsEl: HTMLDivElement | undefined = $state();
 
 	$effect(() => {
-		activeTab;
+		void activeTab;
 		tabPanelsEl?.scrollTo({ top: 0 });
 	});
 
@@ -52,6 +52,84 @@
 		});
 	}
 </script>
+
+{#snippet configFields(idSuffix: '' | '-landscape')}
+	<div class="field">
+		<div class="field-header">
+			<label for="exercise{idSuffix}">Exercise</label>
+			<span class="value" aria-live="polite">{formatSeconds(exerciseSeconds)}</span>
+		</div>
+		<input
+			id="exercise{idSuffix}"
+			type="range"
+			min={LIMITS.exerciseSeconds.min}
+			max={LIMITS.exerciseSeconds.max}
+			step={STEP_SECONDS}
+			value={exerciseSeconds}
+			disabled={isDisabled}
+			oninput={(e) => setExercise(+(e.currentTarget as HTMLInputElement).value)}
+		/>
+		<div class="range-labels">
+			<span>{formatSeconds(LIMITS.exerciseSeconds.min)}</span>
+			<span>{formatSeconds(LIMITS.exerciseSeconds.max)}</span>
+		</div>
+	</div>
+	<div class="field">
+		<div class="field-header">
+			<label for="rest{idSuffix}">Rest</label>
+			<span class="value" aria-live="polite">{formatSeconds(restSeconds)}</span>
+		</div>
+		<input
+			id="rest{idSuffix}"
+			type="range"
+			min={LIMITS.restSeconds.min}
+			max={LIMITS.restSeconds.max}
+			step={STEP_SECONDS}
+			value={restSeconds}
+			disabled={isDisabled}
+			oninput={(e) => setRest(+(e.currentTarget as HTMLInputElement).value)}
+		/>
+		<div class="range-labels">
+			<span>{formatSeconds(LIMITS.restSeconds.min)}</span>
+			<span>{formatSeconds(LIMITS.restSeconds.max)}</span>
+		</div>
+	</div>
+	<div class="field">
+		<label for="rounds{idSuffix}">Rounds</label>
+		<div class="stepper">
+			<button
+				type="button"
+				class="stepper-btn"
+				disabled={isDisabled || rounds <= LIMITS.rounds.min}
+				onclick={() => setRounds(-1)}
+				aria-label="Decrease rounds"
+			>
+				−
+			</button>
+			<span class="stepper-value" aria-live="polite">{rounds}</span>
+			<button
+				type="button"
+				class="stepper-btn"
+				disabled={isDisabled || rounds >= LIMITS.rounds.max}
+				onclick={() => setRounds(1)}
+				aria-label="Increase rounds"
+			>
+				+
+			</button>
+		</div>
+	</div>
+	<div class="field">
+		<button
+			type="button"
+			class="preview-btn"
+			disabled={isDisabled}
+			onclick={() => playAlarm('round_end')}
+			title="Preview round-end bell"
+		>
+			Preview bell
+		</button>
+	</div>
+{/snippet}
 
 <div class="config-wrapper" class:tabbed={useTabs} class:desktop={!useTabs}>
 	{#if useTabs}
@@ -111,81 +189,7 @@
 				hidden={activeTab !== 'custom'}
 			>
 				<form class="config-form" onsubmit={(e) => e.preventDefault()}>
-					<div class="field">
-						<div class="field-header">
-							<label for="exercise-landscape">Exercise</label>
-							<span class="value" aria-live="polite">{formatSeconds(exerciseSeconds)}</span>
-						</div>
-						<input
-							id="exercise-landscape"
-							type="range"
-							min={LIMITS.exerciseSeconds.min}
-							max={LIMITS.exerciseSeconds.max}
-							step={STEP_SECONDS}
-							value={exerciseSeconds}
-							disabled={isDisabled}
-							oninput={(e) => setExercise(+(e.currentTarget as HTMLInputElement).value)}
-						/>
-						<div class="range-labels">
-							<span>{formatSeconds(LIMITS.exerciseSeconds.min)}</span>
-							<span>{formatSeconds(LIMITS.exerciseSeconds.max)}</span>
-						</div>
-					</div>
-					<div class="field">
-						<div class="field-header">
-							<label for="rest-landscape">Rest</label>
-							<span class="value" aria-live="polite">{formatSeconds(restSeconds)}</span>
-						</div>
-						<input
-							id="rest-landscape"
-							type="range"
-							min={LIMITS.restSeconds.min}
-							max={LIMITS.restSeconds.max}
-							step={STEP_SECONDS}
-							value={restSeconds}
-							disabled={isDisabled}
-							oninput={(e) => setRest(+(e.currentTarget as HTMLInputElement).value)}
-						/>
-						<div class="range-labels">
-							<span>{formatSeconds(LIMITS.restSeconds.min)}</span>
-							<span>{formatSeconds(LIMITS.restSeconds.max)}</span>
-						</div>
-					</div>
-					<div class="field">
-						<label for="rounds-landscape">Rounds</label>
-						<div class="stepper">
-							<button
-								type="button"
-								class="stepper-btn"
-								disabled={isDisabled || rounds <= LIMITS.rounds.min}
-								onclick={() => setRounds(-1)}
-								aria-label="Decrease rounds"
-							>
-								−
-							</button>
-							<span class="stepper-value" aria-live="polite">{rounds}</span>
-							<button
-								type="button"
-								class="stepper-btn"
-								disabled={isDisabled || rounds >= LIMITS.rounds.max}
-								onclick={() => setRounds(1)}
-								aria-label="Increase rounds"
-							>
-								+
-							</button>
-						</div>
-					</div>
-					<div class="field">
-						<button
-							type="button"
-							class="preview-btn"
-							disabled={isDisabled}
-							onclick={() => playAlarm('round_end')}
-							title="Preview round-end bell"
-						>
-							Preview bell
-						</button>
-					</div>
+					{@render configFields('-landscape')}
 				</form>
 			</div>
 		</div>
@@ -210,84 +214,7 @@
 
 			<form class="config-form" onsubmit={(e) => e.preventDefault()}>
 				<h2 class="config-title">Custom</h2>
-		<div class="field">
-			<div class="field-header">
-				<label for="exercise">Exercise</label>
-				<span class="value" aria-live="polite">{formatSeconds(exerciseSeconds)}</span>
-			</div>
-			<input
-				id="exercise"
-				type="range"
-				min={LIMITS.exerciseSeconds.min}
-				max={LIMITS.exerciseSeconds.max}
-				step={STEP_SECONDS}
-				value={exerciseSeconds}
-				disabled={isDisabled}
-				oninput={(e) => setExercise(+(e.currentTarget as HTMLInputElement).value)}
-			/>
-			<div class="range-labels">
-				<span>{formatSeconds(LIMITS.exerciseSeconds.min)}</span>
-				<span>{formatSeconds(LIMITS.exerciseSeconds.max)}</span>
-			</div>
-		</div>
-
-		<div class="field">
-			<div class="field-header">
-				<label for="rest">Rest</label>
-				<span class="value" aria-live="polite">{formatSeconds(restSeconds)}</span>
-			</div>
-			<input
-				id="rest"
-				type="range"
-				min={LIMITS.restSeconds.min}
-				max={LIMITS.restSeconds.max}
-				step={STEP_SECONDS}
-				value={restSeconds}
-				disabled={isDisabled}
-				oninput={(e) => setRest(+(e.currentTarget as HTMLInputElement).value)}
-			/>
-			<div class="range-labels">
-				<span>{formatSeconds(LIMITS.restSeconds.min)}</span>
-				<span>{formatSeconds(LIMITS.restSeconds.max)}</span>
-			</div>
-		</div>
-
-		<div class="field">
-			<label for="rounds">Rounds</label>
-			<div class="stepper">
-				<button
-					type="button"
-					class="stepper-btn"
-					disabled={isDisabled || rounds <= LIMITS.rounds.min}
-					onclick={() => setRounds(-1)}
-					aria-label="Decrease rounds"
-				>
-					−
-				</button>
-				<span class="stepper-value" aria-live="polite">{rounds}</span>
-				<button
-					type="button"
-					class="stepper-btn"
-					disabled={isDisabled || rounds >= LIMITS.rounds.max}
-					onclick={() => setRounds(1)}
-					aria-label="Increase rounds"
-				>
-					+
-				</button>
-			</div>
-		</div>
-
-		<div class="field">
-			<button
-				type="button"
-				class="preview-btn"
-				disabled={isDisabled}
-				onclick={() => playAlarm('round_end')}
-				title="Preview round-end bell"
-			>
-				Preview bell
-			</button>
-		</div>
+				{@render configFields('')}
 			</form>
 		</div>
 	{/if}
@@ -342,7 +269,9 @@
 		border-bottom: 2px solid transparent;
 		color: var(--color-text-muted);
 		cursor: pointer;
-		transition: color 0.15s, border-color 0.15s;
+		transition:
+			color 0.15s,
+			border-color 0.15s;
 	}
 
 	.tab-btn.active {

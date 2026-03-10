@@ -1,4 +1,4 @@
-import type { Config, TimerPhase, WorkoutConfig } from '$lib/types/timer';
+import type { TimerPhase, WorkoutConfig } from '$lib/types/timer';
 import { configStore } from './config.svelte';
 import type { BellSignal } from '$lib/services/sound';
 import { playAlarm } from '$lib/services/sound';
@@ -124,7 +124,9 @@ function createTimerStore() {
 		},
 		resume() {
 			if (phase !== 'exercise' && phase !== 'rest') return;
+			if (!isPaused) return;
 			isPaused = false;
+			clearTimer();
 			scheduleTick();
 		},
 		togglePause() {

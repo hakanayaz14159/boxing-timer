@@ -7,7 +7,7 @@
 	<a
 		href={GITHUB_REPO_URL}
 		target="_blank"
-		rel="noopener noreferrer"
+		rel="external noopener noreferrer"
 		class="github-link"
 		aria-label="View on GitHub"
 	>

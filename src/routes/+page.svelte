@@ -6,7 +6,7 @@
 	import { timerStore } from '$lib/stores/timer.svelte';
 
 	const phase = $derived(timerStore.phase);
-	const showConfig = $derived(phase === 'config' || phase === 'ready');
+	const showConfig = $derived(phase === 'config');
 	const showCountdown = $derived(
 		phase === 'countdown' || phase === 'exercise' || phase === 'rest' || phase === 'finished'
 	);
@@ -31,36 +31,38 @@
 		class:countdown-layout={showCountdown}
 		class:config-layout={showConfig}
 	>
-	{#if showConfig}
-		<div class="config-split">
-			<div class="config-left">
-				<ConfigForm />
-			</div>
-			<div class="config-right">
-				<TimerControls />
-			</div>
-		</div>
-	{/if}
-	{#if showCountdown}
-		<div class="countdown-split">
-			<div class="countdown-left">
-				<CountdownDisplay />
-			</div>
-			<div class="countdown-right">
-				<div class="right-info">
-					{#if phaseLabel}
-						<span class="phase-label">{phaseLabel}</span>
-					{/if}
-					{#if showRound}
-						<span class="round">Round {timerStore.currentRound} / {timerStore.activeConfig.rounds}</span>
-					{/if}
+		{#if showConfig}
+			<div class="config-split">
+				<div class="config-left">
+					<ConfigForm />
 				</div>
-				<div class="controls-divider"></div>
-				<TimerControls />
+				<div class="config-right">
+					<TimerControls />
+				</div>
 			</div>
-		</div>
-	{/if}
-</main>
+		{/if}
+		{#if showCountdown}
+			<div class="countdown-split">
+				<div class="countdown-left">
+					<CountdownDisplay />
+				</div>
+				<div class="countdown-right">
+					<div class="right-info">
+						{#if phaseLabel}
+							<span class="phase-label">{phaseLabel}</span>
+						{/if}
+						{#if showRound}
+							<span class="round"
+								>Round {timerStore.currentRound} / {timerStore.activeConfig.rounds}</span
+							>
+						{/if}
+					</div>
+					<div class="controls-divider"></div>
+					<TimerControls />
+				</div>
+			</div>
+		{/if}
+	</main>
 </div>
 
 <style>
@@ -78,13 +80,15 @@
 		height: 100%;
 		overflow: hidden;
 		background: var(--color-bg);
-		padding: calc(1.5rem + env(safe-area-inset-top, 0)) 1.5rem calc(2rem + env(safe-area-inset-bottom, 0));
+		padding: calc(1.5rem + env(safe-area-inset-top, 0)) 1.5rem
+			calc(2rem + env(safe-area-inset-bottom, 0));
 		transition: background 0.3s ease;
 	}
 
 	.page.countdown-layout,
 	.page.config-layout {
-		padding: calc(1.5rem + env(safe-area-inset-top, 0)) 1rem calc(1rem + env(safe-area-inset-bottom, 0));
+		padding: calc(1.5rem + env(safe-area-inset-top, 0)) 1rem
+			calc(1rem + env(safe-area-inset-bottom, 0));
 		justify-content: stretch;
 	}
 
@@ -178,7 +182,8 @@
 
 		.page.countdown-layout,
 		.page.config-layout {
-			padding: calc(1.5rem + env(safe-area-inset-top, 0)) 0.75rem calc(1rem + env(safe-area-inset-bottom, 0));
+			padding: calc(1.5rem + env(safe-area-inset-top, 0)) 0.75rem
+				calc(1rem + env(safe-area-inset-bottom, 0));
 		}
 
 		.countdown-split,
@@ -246,7 +251,8 @@
 
 		.page.countdown-layout,
 		.page.config-layout {
-			padding: calc(0.5rem + env(safe-area-inset-top, 0)) 1rem calc(0.25rem + env(safe-area-inset-bottom, 0));
+			padding: calc(0.5rem + env(safe-area-inset-top, 0)) 1rem
+				calc(0.25rem + env(safe-area-inset-bottom, 0));
 		}
 
 		.countdown-split {
@@ -326,5 +332,4 @@
 		gap: 1rem;
 		min-width: 0;
 	}
-
 </style>
