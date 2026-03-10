@@ -43,6 +43,13 @@
 		z-index: 10;
 	}
 
+	@media (orientation: landscape) and (max-height: 500px) {
+		.header {
+			padding: 0.5rem 1rem;
+			padding-top: calc(0.5rem + env(safe-area-inset-top, 0));
+		}
+	}
+
 	.title {
 		font-size: clamp(1.25rem, 4vw, 1.5rem);
 		font-weight: 700;

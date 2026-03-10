@@ -23,9 +23,20 @@
 		if (phase === 'finished') return 'Workout Complete';
 		return '';
 	});
+
+	const isPaused = $derived(timerStore.isPaused);
+	const showPaused = $derived(
+		isPaused && (timerStore.phase === 'exercise' || timerStore.phase === 'rest')
+	);
 </script>
 
 <div class="countdown" aria-live="polite" aria-atomic="true">
+	{#if showPaused}
+		<div class="paused-overlay" aria-live="polite">
+			<span class="paused-backdrop"></span>
+			<span class="paused-text">Paused</span>
+		</div>
+	{/if}
 	{#if phaseLabel}
 		<span class="phase-label">{phaseLabel}</span>
 	{/if}
@@ -37,6 +48,7 @@
 
 <style>
 	.countdown {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -55,7 +67,7 @@
 	}
 
 	.display {
-		font-size: clamp(4rem, 20vw, 12rem);
+		font-size: clamp(3rem, min(20vw, 15vh), 12rem);
 		font-weight: 700;
 		line-height: 1;
 		color: var(--color-text, #111);
@@ -63,7 +75,36 @@
 	}
 
 	.round {
-		font-size: clamp(0.875rem, 2.5vw, 1rem);
-		color: var(--color-text-muted, #666);
+		font-size: clamp(1.5rem, 6vw, 3.5rem);
+		font-weight: 700;
+		font-family: var(--font-display, system-ui, sans-serif);
+		color: var(--color-text);
+		letter-spacing: 0.02em;
+	}
+
+	.paused-overlay {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		pointer-events: none;
+		user-select: none;
+	}
+
+	.paused-backdrop {
+		position: absolute;
+		inset: 0;
+		background: var(--color-bg);
+		opacity: 0.85;
+	}
+
+	.paused-text {
+		position: relative;
+		font-size: clamp(3rem, 15vw, 8rem);
+		font-weight: 700;
+		font-family: var(--font-display, system-ui, sans-serif);
+		color: var(--color-text);
+		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 	}
 </style>

@@ -35,12 +35,14 @@
 		flex-wrap: wrap;
 		gap: 0.75rem;
 		justify-content: center;
-		align-items: center;
+		align-items: stretch;
+		width: 100%;
 	}
 
 	.btn {
+		flex: 1;
+		min-width: 0;
 		min-height: 48px;
-		min-width: 48px;
 		padding: 0.75rem 1.5rem;
 		font-size: 1rem;
 		font-weight: 600;
@@ -60,6 +62,47 @@
 	.btn:focus-visible {
 		outline: 2px solid var(--color-primary);
 		outline-offset: 2px;
+	}
+
+	/* Mobile portrait: larger touch targets */
+	@media (max-width: 640px) and (orientation: portrait) {
+		.controls {
+			gap: 1rem;
+		}
+
+		.btn {
+			min-height: 56px;
+			min-width: 80px;
+			flex: 1 1 0;
+			font-size: 1.0625rem;
+		}
+	}
+
+	/* Mobile landscape: full-width, easy thumb reach at bottom */
+	@media (orientation: landscape) and (max-height: 500px) {
+		.controls {
+			flex-direction: row;
+			gap: 0.5rem;
+		}
+
+		.btn {
+			min-height: 52px;
+			flex: 1;
+			font-size: 0.9375rem;
+			padding: 0.625rem 1rem;
+		}
+	}
+
+	/* Desktop: fixed min-width, no flex grow */
+	@media (min-width: 641px) {
+		.controls {
+			width: auto;
+		}
+
+		.btn {
+			flex: none;
+			min-width: 48px;
+		}
 	}
 
 	.btn-primary {

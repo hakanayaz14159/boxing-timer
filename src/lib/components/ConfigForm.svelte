@@ -141,6 +141,12 @@
 		max-width: 20rem;
 	}
 
+	@media (orientation: landscape) and (max-height: 500px) {
+		.config-wrapper {
+			gap: 1rem;
+		}
+	}
+
 	.presets-title,
 	.config-title {
 		font-size: 0.75rem;
