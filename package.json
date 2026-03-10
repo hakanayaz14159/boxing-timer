@@ -3,6 +3,7 @@
 	"private": true,
 	"version": "0.0.1",
 	"description": "Boxing interval timer SPA",
+	"repository": "https://github.com/hakanayaz14159/boxing-timer",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
