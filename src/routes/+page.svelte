@@ -13,7 +13,11 @@
 </script>
 
 <AppHeader />
-<main class="page">
+<main
+	class="page"
+	class:phase-exercise={phase === 'exercise'}
+	class:phase-rest={phase === 'rest'}
+>
 	{#if showConfig}
 		<div class="config-section">
 			<ConfigForm />
@@ -35,8 +39,18 @@
 		justify-content: center;
 		height: 100dvh;
 		overflow: hidden;
+		background: var(--color-bg);
 		padding: 6rem 1.5rem 2rem;
 		padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0));
+		transition: background 0.3s ease;
+	}
+
+	.page.phase-exercise {
+		background: var(--color-bg-exercise);
+	}
+
+	.page.phase-rest {
+		background: var(--color-bg-rest);
 	}
 
 	@media (max-width: 640px) and (orientation: portrait) {

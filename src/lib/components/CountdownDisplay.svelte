@@ -32,10 +32,7 @@
 
 <div class="countdown" aria-live="polite" aria-atomic="true">
 	{#if showPaused}
-		<div class="paused-overlay" aria-live="polite">
-			<span class="paused-backdrop"></span>
-			<span class="paused-text">Paused</span>
-		</div>
+		<span class="paused-badge" aria-live="polite">Paused</span>
 	{/if}
 	{#if phaseLabel}
 		<span class="phase-label">{phaseLabel}</span>
@@ -101,34 +98,32 @@
 			font-size: 0.875rem;
 		}
 
-		.paused-text {
-			font-size: clamp(4rem, 22vh, 8rem);
+		.paused-badge {
+			font-size: clamp(0.875rem, 3vw, 1rem);
+			padding: 0.375rem 0.75rem;
 		}
 	}
 
-	.paused-overlay {
-		position: absolute;
-		inset: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		pointer-events: none;
-		user-select: none;
-	}
-
-	.paused-backdrop {
-		position: absolute;
-		inset: 0;
-		background: var(--color-bg);
-		opacity: 0.85;
-	}
-
-	.paused-text {
-		position: relative;
-		font-size: clamp(3rem, 15vw, 8rem);
+	.paused-badge {
+		padding: 0.5rem 1rem;
+		font-size: clamp(1rem, 4vw, 1.375rem);
 		font-weight: 700;
-		font-family: var(--font-display, system-ui, sans-serif);
+		font-family: var(--font-body);
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
 		color: var(--color-text);
-		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+		background: var(--color-bg-input);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		animation: fadeIn 0.2s ease forwards;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
 	}
 </style>

@@ -9,6 +9,8 @@
 	--color-primary: #dc2626;
 	--color-secondary: #475569;
 	--color-border: #e2e8f0;
+	--color-bg-exercise: #fef2f2;
+	--color-bg-rest: #f0f9ff;
 	--radius-md: 0.5rem;
 	--font-display: 'JetBrains Mono', ui-monospace, monospace;
 	--font-body: 'DM Sans', system-ui, sans-serif;
@@ -24,6 +26,8 @@
 		--color-primary: #ef4444;
 		--color-secondary: #64748b;
 		--color-border: #334155;
+		--color-bg-exercise: #451a1a;
+		--color-bg-rest: #0c4a6e;
 	}
 }
 

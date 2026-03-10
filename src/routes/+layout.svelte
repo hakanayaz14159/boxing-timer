@@ -10,9 +10,7 @@
 
 	$effect(() => {
 		const phase = timerStore.phase;
-		const isPaused = timerStore.isPaused;
-		const shouldHold =
-			(phase === 'countdown' || phase === 'exercise' || phase === 'rest') && !isPaused;
+		const shouldHold = phase === 'countdown' || phase === 'exercise' || phase === 'rest';
 		ensureVisibilityHandler();
 		setWakeLock(shouldHold);
 	});
