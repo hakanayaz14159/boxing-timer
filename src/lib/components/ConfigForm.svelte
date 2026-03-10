@@ -5,8 +5,30 @@
 	import { LIMITS, STEP_SECONDS } from '$lib/stores/config.svelte';
 	import { BOXING_PRESETS } from '$lib/constants/presets';
 	import { playAlarm } from '$lib/services/sound';
+	import { onMount } from 'svelte';
 
 	const isDisabled = $derived(timerStore.phase === 'exercise' || timerStore.phase === 'rest');
+
+	let activeTab = $state<'presets' | 'custom'>('presets');
+	let useTabs = $state(false);
+	let tabPanelsEl: HTMLDivElement | undefined = $state();
+
+	$effect(() => {
+		activeTab;
+		tabPanelsEl?.scrollTo({ top: 0 });
+	});
+
+	onMount(() => {
+		const mq = window.matchMedia(
+			'(max-width: 640px), ((orientation: landscape) and (max-height: 500px))'
+		);
+		useTabs = mq.matches;
+		const handler = () => {
+			useTabs = mq.matches;
+		};
+		mq.addEventListener('change', handler);
+		return () => mq.removeEventListener('change', handler);
+	});
 
 	const exerciseSeconds = $derived(configStore.value.exerciseSeconds);
 	const restSeconds = $derived(configStore.value.restSeconds);
@@ -31,26 +53,163 @@
 	}
 </script>
 
-<div class="config-wrapper">
-	<section class="presets" aria-label="Quick start presets">
-		<h2 class="presets-title">Quick start</h2>
-		<div class="presets-grid">
-			{#each BOXING_PRESETS as preset (preset.id)}
-				<button
-					type="button"
-					class="preset-btn"
-					disabled={isDisabled}
-					onclick={() => timerStore.start(preset.config)}
-					title="Start {preset.label}"
-				>
-					{preset.label}
-				</button>
-			{/each}
+<div class="config-wrapper" class:tabbed={useTabs} class:desktop={!useTabs}>
+	{#if useTabs}
+		<div class="tabs" role="tablist" aria-label="Configuration sections">
+			<button
+				type="button"
+				role="tab"
+				aria-selected={activeTab === 'presets'}
+				aria-controls="tab-presets"
+				id="tab-btn-presets"
+				class="tab-btn"
+				class:active={activeTab === 'presets'}
+				onclick={() => (activeTab = 'presets')}
+			>
+				Quick start
+			</button>
+			<button
+				type="button"
+				role="tab"
+				aria-selected={activeTab === 'custom'}
+				aria-controls="tab-custom"
+				id="tab-btn-custom"
+				class="tab-btn"
+				class:active={activeTab === 'custom'}
+				onclick={() => (activeTab = 'custom')}
+			>
+				Custom
+			</button>
 		</div>
-	</section>
+		<div class="tab-panels" bind:this={tabPanelsEl}>
+			<div
+				id="tab-presets"
+				role="tabpanel"
+				aria-labelledby="tab-btn-presets"
+				class="tab-panel"
+				hidden={activeTab !== 'presets'}
+			>
+				<div class="presets-grid">
+					{#each BOXING_PRESETS as preset (preset.id)}
+						<button
+							type="button"
+							class="preset-btn"
+							disabled={isDisabled}
+							onclick={() => timerStore.start(preset.config)}
+							title="Start {preset.label}"
+						>
+							{preset.label}
+						</button>
+					{/each}
+				</div>
+			</div>
+			<div
+				id="tab-custom"
+				role="tabpanel"
+				aria-labelledby="tab-btn-custom"
+				class="tab-panel"
+				hidden={activeTab !== 'custom'}
+			>
+				<form class="config-form" onsubmit={(e) => e.preventDefault()}>
+					<div class="field">
+						<div class="field-header">
+							<label for="exercise-landscape">Exercise</label>
+							<span class="value" aria-live="polite">{formatSeconds(exerciseSeconds)}</span>
+						</div>
+						<input
+							id="exercise-landscape"
+							type="range"
+							min={LIMITS.exerciseSeconds.min}
+							max={LIMITS.exerciseSeconds.max}
+							step={STEP_SECONDS}
+							value={exerciseSeconds}
+							disabled={isDisabled}
+							oninput={(e) => setExercise(+(e.currentTarget as HTMLInputElement).value)}
+						/>
+						<div class="range-labels">
+							<span>{formatSeconds(LIMITS.exerciseSeconds.min)}</span>
+							<span>{formatSeconds(LIMITS.exerciseSeconds.max)}</span>
+						</div>
+					</div>
+					<div class="field">
+						<div class="field-header">
+							<label for="rest-landscape">Rest</label>
+							<span class="value" aria-live="polite">{formatSeconds(restSeconds)}</span>
+						</div>
+						<input
+							id="rest-landscape"
+							type="range"
+							min={LIMITS.restSeconds.min}
+							max={LIMITS.restSeconds.max}
+							step={STEP_SECONDS}
+							value={restSeconds}
+							disabled={isDisabled}
+							oninput={(e) => setRest(+(e.currentTarget as HTMLInputElement).value)}
+						/>
+						<div class="range-labels">
+							<span>{formatSeconds(LIMITS.restSeconds.min)}</span>
+							<span>{formatSeconds(LIMITS.restSeconds.max)}</span>
+						</div>
+					</div>
+					<div class="field">
+						<label for="rounds-landscape">Rounds</label>
+						<div class="stepper">
+							<button
+								type="button"
+								class="stepper-btn"
+								disabled={isDisabled || rounds <= LIMITS.rounds.min}
+								onclick={() => setRounds(-1)}
+								aria-label="Decrease rounds"
+							>
+								−
+							</button>
+							<span class="stepper-value" aria-live="polite">{rounds}</span>
+							<button
+								type="button"
+								class="stepper-btn"
+								disabled={isDisabled || rounds >= LIMITS.rounds.max}
+								onclick={() => setRounds(1)}
+								aria-label="Increase rounds"
+							>
+								+
+							</button>
+						</div>
+					</div>
+					<div class="field">
+						<button
+							type="button"
+							class="preview-btn"
+							disabled={isDisabled}
+							onclick={() => playAlarm('round_end')}
+							title="Preview round-end bell"
+						>
+							Preview bell
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	{:else}
+		<div class="desktop-side-by-side">
+			<section class="presets" aria-label="Quick start presets">
+				<h2 class="presets-title">Quick start</h2>
+				<div class="presets-grid">
+					{#each BOXING_PRESETS as preset (preset.id)}
+						<button
+							type="button"
+							class="preset-btn"
+							disabled={isDisabled}
+							onclick={() => timerStore.start(preset.config)}
+							title="Start {preset.label}"
+						>
+							{preset.label}
+						</button>
+					{/each}
+				</div>
+			</section>
 
-	<form class="config-form" onsubmit={(e) => e.preventDefault()}>
-		<h2 class="config-title">Custom</h2>
+			<form class="config-form" onsubmit={(e) => e.preventDefault()}>
+				<h2 class="config-title">Custom</h2>
 		<div class="field">
 			<div class="field-header">
 				<label for="exercise">Exercise</label>
@@ -129,7 +288,9 @@
 				Preview bell
 			</button>
 		</div>
-	</form>
+			</form>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -141,9 +302,141 @@
 		max-width: 20rem;
 	}
 
+	.config-wrapper.tabbed {
+		max-width: none;
+		flex: 1;
+		min-width: 0;
+		min-height: 0;
+		gap: 0;
+		width: 100%;
+	}
+
+	.config-wrapper.desktop {
+		max-width: 42rem;
+	}
+
+	.desktop-side-by-side {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 2rem;
+		width: 100%;
+		min-width: 0;
+	}
+
+	.tabs {
+		display: flex;
+		flex-shrink: 0;
+		min-width: 0;
+		gap: 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.tab-btn {
+		flex: 1;
+		min-height: 44px;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		background: transparent;
+		border: none;
+		border-bottom: 2px solid transparent;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		transition: color 0.15s, border-color 0.15s;
+	}
+
+	.tab-btn.active {
+		color: var(--color-primary);
+		border-bottom-color: var(--color-primary);
+	}
+
+	.tab-btn:hover:not(.active) {
+		color: var(--color-text);
+	}
+
+	.tab-panels {
+		flex: 1;
+		min-width: 0;
+		min-height: 0;
+		overflow-y: auto;
+		padding: 1rem 12px 1rem;
+	}
+
+	.tab-panel {
+		min-width: 0;
+	}
+
+	.config-wrapper.tabbed .config-form {
+		gap: 1.5rem;
+	}
+
 	@media (orientation: landscape) and (max-height: 500px) {
-		.config-wrapper {
-			gap: 1rem;
+		.config-wrapper.tabbed .tabs .tab-btn {
+			min-height: 32px;
+			padding: 0.25rem 0.5rem;
+			font-size: 0.75rem;
+		}
+
+		.config-wrapper.tabbed .tab-panels {
+			padding: 0.5rem 8px 0.5rem;
+			overflow: hidden;
+		}
+
+		.config-wrapper.tabbed .presets-grid {
+			gap: 0.25rem;
+		}
+
+		.config-wrapper.tabbed .presets-grid .preset-btn {
+			min-height: 32px;
+			padding: 0.25rem 0.375rem;
+			font-size: 0.75rem;
+		}
+
+		.config-wrapper.tabbed .config-form {
+			gap: 0.5rem;
+		}
+
+		.config-wrapper.tabbed .field {
+			gap: 0.25rem;
+		}
+
+		.config-wrapper.tabbed .field label,
+		.config-wrapper.tabbed .value {
+			font-size: 0.8125rem;
+		}
+
+		.config-wrapper.tabbed .range-labels {
+			font-size: 0.6875rem;
+		}
+
+		.config-wrapper.tabbed input[type='range'] {
+			height: 6px;
+		}
+
+		.config-wrapper.tabbed input[type='range']::-webkit-slider-thumb {
+			width: 16px;
+			height: 16px;
+		}
+
+		.config-wrapper.tabbed input[type='range']::-moz-range-thumb {
+			width: 16px;
+			height: 16px;
+		}
+
+		.config-wrapper.tabbed .stepper-btn {
+			flex: 0 0 32px;
+			height: 32px;
+			font-size: 1.25rem;
+		}
+
+		.config-wrapper.tabbed .stepper-value {
+			font-size: 1rem;
+		}
+
+		.config-wrapper.tabbed .preview-btn {
+			min-height: 28px;
+			padding: 0.25rem 0.5rem;
+			font-size: 0.75rem;
 		}
 	}
 
@@ -161,9 +454,11 @@
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
 		gap: 0.5rem;
+		min-width: 0;
 	}
 
 	.preset-btn {
+		min-width: 0;
 		min-height: 44px;
 		padding: 0.5rem 0.75rem;
 		font-size: 0.875rem;
@@ -173,6 +468,9 @@
 		border-radius: var(--radius-md);
 		color: var(--color-text);
 		cursor: pointer;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 		transition:
 			background 0.15s,
 			border-color 0.15s;
@@ -205,6 +503,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: baseline;
+		min-width: 0;
 	}
 
 	.field label {
@@ -218,6 +517,7 @@
 		font-size: 1rem;
 		font-weight: 700;
 		color: var(--color-primary);
+		flex-shrink: 0;
 	}
 
 	.range-labels {
@@ -231,6 +531,7 @@
 		-webkit-appearance: none;
 		appearance: none;
 		width: 100%;
+		min-width: 0;
 		height: 8px;
 		border-radius: 4px;
 		background: var(--color-border);
@@ -278,6 +579,7 @@
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+		min-width: 0;
 		background: var(--color-bg-input);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
@@ -311,6 +613,7 @@
 
 	.stepper-value {
 		flex: 1;
+		min-width: 0;
 		text-align: center;
 		font-family: var(--font-display);
 		font-size: 1.25rem;

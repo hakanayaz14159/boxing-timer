@@ -67,6 +67,7 @@
 	.page-wrapper {
 		position: relative;
 		height: 100dvh;
+		overflow: hidden;
 	}
 
 	.page {
@@ -87,11 +88,17 @@
 		justify-content: stretch;
 	}
 
-	.countdown-split {
+	.countdown-split,
+	.config-split {
 		display: flex;
 		flex: 1;
 		width: 100%;
+		min-width: 0;
 		min-height: 0;
+		align-self: stretch;
+	}
+
+	.countdown-split {
 		gap: 1rem;
 	}
 
@@ -184,6 +191,12 @@
 		.config-left {
 			flex: 1;
 			min-height: 0;
+			overflow: hidden;
+		}
+
+		.config-left {
+			align-items: stretch;
+			justify-content: flex-start;
 		}
 
 		.countdown-right,
@@ -233,26 +246,42 @@
 
 		.page.countdown-layout,
 		.page.config-layout {
-			padding: calc(0.5rem + env(safe-area-inset-top, 0)) 0.75rem calc(0.5rem + env(safe-area-inset-bottom, 0));
+			padding: calc(0.5rem + env(safe-area-inset-top, 0)) 1rem calc(0.5rem + env(safe-area-inset-bottom, 0));
 		}
 
-		.countdown-split,
-		.config-split {
-			flex-direction: row;
+		.countdown-split {
+			display: grid;
+			grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
 			gap: 0.5rem;
 		}
 
-		.countdown-left,
-		.config-left {
-			flex: 0 0 70%;
-			min-height: 0;
+		.config-split {
+			flex-direction: row;
+			gap: 0.5rem;
+			align-items: stretch;
 		}
 
-		.countdown-right,
-		.config-right {
+		.config-left {
 			flex: 1;
-			flex-direction: column;
+			min-width: 0;
+			min-height: 0;
+			overflow: hidden;
+			align-items: stretch;
+			justify-content: flex-start;
+		}
+
+		.config-right {
+			flex-shrink: 0;
 			justify-content: center;
+		}
+
+		.countdown-left,
+		.countdown-right {
+			min-width: 0;
+		}
+
+		.countdown-left {
+			overflow: hidden;
 		}
 
 		.countdown-right :global(.controls) {
@@ -264,13 +293,14 @@
 			max-width: none;
 			flex-direction: column;
 		}
+
+		.config-right :global(.btn-primary) {
+			min-height: 56px;
+			font-size: 1.25rem;
+		}
 	}
 
 	.config-split {
-		display: flex;
-		flex: 1;
-		width: 100%;
-		min-height: 0;
 		gap: 1rem;
 	}
 

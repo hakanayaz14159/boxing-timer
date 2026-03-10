@@ -48,8 +48,7 @@
 
 	@media (orientation: landscape) and (max-height: 500px) {
 		.top-bar {
-			padding: 0.5rem 1rem;
-			padding-top: calc(0.5rem + env(safe-area-inset-top, 0));
+			display: none;
 		}
 	}
 
