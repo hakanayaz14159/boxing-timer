@@ -54,6 +54,7 @@ function createTimerStore() {
 				remainingSeconds = 1; // Each step displays for 1 second
 				scheduleTick(true);
 			} else {
+				playAlarm('round_end');
 				phase = 'exercise';
 				currentRound = 1;
 				remainingSeconds = getConfig().exerciseSeconds;
