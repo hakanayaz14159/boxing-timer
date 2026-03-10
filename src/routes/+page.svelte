@@ -33,20 +33,33 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		min-height: 100dvh;
+		height: 100dvh;
+		overflow: hidden;
 		padding: 6rem 1.5rem 2rem;
 		padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0));
 	}
 
-	@media (orientation: landscape) and (max-height: 500px) {
+	@media (max-width: 640px) and (orientation: portrait) {
 		.page {
-			padding-top: 4rem;
-			padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0));
+			padding-top: 5rem;
+			padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0));
 		}
 
 		.controls-wrapper {
-			margin-top: 1rem;
+			margin-top: 1.5rem;
 			padding-top: 1rem;
+		}
+	}
+
+	@media (orientation: landscape) and (max-height: 500px) {
+		.page {
+			padding-top: 3rem;
+			padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0));
+		}
+
+		.controls-wrapper {
+			margin-top: 0.5rem;
+			padding-top: 0.5rem;
 			max-width: none;
 		}
 	}

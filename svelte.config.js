@@ -9,7 +9,10 @@ const config = {
 		paths: {
 			base: process.env.BASE_PATH || ''
 		},
-		appDir: 'app'
+		appDir: 'app',
+		serviceWorker: {
+			register: false
+		}
 	}
 };
 

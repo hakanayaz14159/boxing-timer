@@ -54,6 +54,7 @@
 		align-items: center;
 		justify-content: center;
 		flex: 1;
+		min-height: 0;
 		gap: 0.5rem;
 		text-align: center;
 		padding: 1rem;
@@ -80,6 +81,29 @@
 		font-family: var(--font-display, system-ui, sans-serif);
 		color: var(--color-text);
 		letter-spacing: 0.02em;
+	}
+
+	@media (orientation: landscape) and (max-height: 500px) {
+		.countdown {
+			gap: 0.25rem;
+			padding: 0.5rem;
+		}
+
+		.phase-label {
+			font-size: 0.75rem;
+		}
+
+		.display {
+			font-size: clamp(4rem, min(25vw, 22vh), 12rem);
+		}
+
+		.round {
+			font-size: 0.875rem;
+		}
+
+		.paused-text {
+			font-size: clamp(4rem, 22vh, 8rem);
+		}
 	}
 
 	.paused-overlay {
