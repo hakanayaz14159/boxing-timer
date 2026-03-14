@@ -66,7 +66,7 @@
 
 	.controls-wrapper {
 		display: flex;
-		justify-content: center;
+		justify-content: flex-end;
 		width: 100%;
 	}
 
@@ -92,7 +92,7 @@
 		.controls-wrapper :global(.controls) {
 			max-width: none;
 			flex-direction: row;
-			justify-content: center;
+			justify-content: flex-end;
 			gap: 1rem;
 		}
 
@@ -113,7 +113,7 @@
 			max-width: none;
 			flex-direction: row;
 			gap: 0.75rem;
-			justify-content: center;
+			justify-content: flex-end;
 		}
 
 		.controls-wrapper :global(.btn) {
