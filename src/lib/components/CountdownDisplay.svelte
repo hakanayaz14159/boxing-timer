@@ -1,17 +1,21 @@
 <script lang="ts">
 	import { formatSeconds } from '$lib/utils/format';
 	import { timerStore } from '$lib/stores/timer.svelte';
+	import { localeStore, locale } from '$lib/i18n';
 
+	const t = localeStore.t.bind(localeStore);
+	$locale;
 	const displayText = $derived.by(() => {
 		const phase = timerStore.phase;
 		if (phase === 'countdown') {
-			return String(timerStore.countdownDisplay);
+			const raw = timerStore.countdownDisplay;
+			return raw === 'Start' ? t('controls.start') : String(raw);
 		}
 		if (phase === 'exercise' || phase === 'rest') {
 			return formatSeconds(timerStore.remainingSeconds);
 		}
 		if (phase === 'finished') {
-			return 'Done';
+			return t('timer.done');
 		}
 		return '';
 	});
@@ -21,13 +25,14 @@
 		isPaused && (timerStore.phase === 'exercise' || timerStore.phase === 'rest')
 	);
 
-	/** Long text (Start, Done) needs smaller font to fit; digits use large font for readability */
-	const isLongText = $derived(displayText === 'Start' || displayText === 'Done');
+	const isLongText = $derived(
+		displayText === t('controls.start') || displayText === t('timer.done')
+	);
 </script>
 
 <div class="countdown" aria-live="polite" aria-atomic="true">
 	{#if showPaused}
-		<span class="paused-badge" aria-live="polite">Paused</span>
+		<span class="paused-badge" aria-live="polite">{t('timer.paused')}</span>
 	{/if}
 	<span class="display" class:display--long={isLongText}>{displayText}</span>
 </div>
@@ -49,7 +54,6 @@
 		container-name: countdown;
 	}
 
-	/* Large font for digits (3, 2, 1) and numbers (up to 3 digits) – readable from distance */
 	.display {
 		font-size: min(32cqw, 42cqh);
 		font-weight: 700;
@@ -58,7 +62,6 @@
 		font-family: var(--font-display, system-ui, sans-serif);
 	}
 
-	/* Smaller font for "Start"/"Done" so they fit without overflow */
 	.display.display--long {
 		font-size: min(18cqw, 25cqh);
 	}

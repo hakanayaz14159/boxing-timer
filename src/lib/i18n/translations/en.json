@@ -1,0 +1,41 @@
+{
+	"app": {
+		"title": "Boxing Timer",
+		"viewOnGitHub": "View on GitHub"
+	},
+	"controls": {
+		"start": "Start",
+		"resume": "Resume",
+		"pause": "Pause",
+		"reset": "Reset"
+	},
+	"config": {
+		"exercise": "Exercise",
+		"rest": "Rest",
+		"rounds": "Rounds",
+		"decreaseRounds": "Decrease rounds",
+		"increaseRounds": "Increase rounds",
+		"previewBell": "Preview bell",
+		"previewBellTitle": "Preview round-end bell",
+		"quickStart": "Quick start",
+		"custom": "Custom",
+		"configSections": "Configuration sections"
+	},
+	"timer": {
+		"paused": "Paused",
+		"done": "Done",
+		"getReady": "Get Ready",
+		"exercise": "Exercise",
+		"rest": "Rest",
+		"workoutComplete": "Workout Complete",
+		"round": "Round {current} / {total}"
+	},
+	"presets": {
+		"amateur": "Amateur (3×3)",
+		"pro-6": "Pro 6 rounds",
+		"pro-8": "Pro 8 rounds",
+		"pro-12": "Pro 12 rounds",
+		"womens-pro": "Women's Pro",
+		"fitness": "Fitness (2×5)"
+	}
+}

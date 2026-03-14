@@ -6,13 +6,6 @@ export interface Preset {
 	config: WorkoutConfig;
 }
 
-/**
- * Common boxing timer presets based on official rules.
- * - Amateur: 3×3 min, 1 min rest (Olympic/elite standard)
- * - Pro Men: 3 min rounds, 1 min rest
- * - Pro Women: 2 min rounds, 1 min rest
- * - Fitness: shorter rounds for bag work
- */
 export const BOXING_PRESETS: Preset[] = [
 	{
 		id: 'amateur',

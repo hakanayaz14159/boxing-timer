@@ -1,13 +1,16 @@
 <script lang="ts">
 	import TimerControls from '$lib/components/TimerControls.svelte';
 	import { timerStore } from '$lib/stores/timer.svelte';
+	import { localeStore, locale } from '$lib/i18n';
 
+	const t = localeStore.t.bind(localeStore);
+	$locale;
 	const phase = $derived(timerStore.phase);
 	const phaseLabel = $derived.by(() => {
-		if (phase === 'exercise') return 'Exercise';
-		if (phase === 'rest') return 'Rest';
-		if (phase === 'countdown') return 'Get Ready';
-		if (phase === 'finished') return 'Workout Complete';
+		if (phase === 'exercise') return t('timer.exercise');
+		if (phase === 'rest') return t('timer.rest');
+		if (phase === 'countdown') return t('timer.getReady');
+		if (phase === 'finished') return t('timer.workoutComplete');
 		return '';
 	});
 	const showRound = $derived(phase === 'exercise' || phase === 'rest');
@@ -19,7 +22,12 @@
 			<span class="phase-label">{phaseLabel}</span>
 		{/if}
 		{#if showRound}
-			<span class="round">Round {timerStore.currentRound} / {timerStore.activeConfig.rounds}</span>
+			<span class="round">
+				{t('timer.round', {
+					current: timerStore.currentRound,
+					total: timerStore.activeConfig.rounds
+				})}
+			</span>
 		{/if}
 	</div>
 	<div class="controls-wrapper">

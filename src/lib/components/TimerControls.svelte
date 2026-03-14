@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { timerStore } from '$lib/stores/timer.svelte';
+	import { localeStore, locale } from '$lib/i18n';
 
+	const t = localeStore.t.bind(localeStore);
+	$locale;
 	const phase = $derived(timerStore.phase);
 	const isPaused = $derived(timerStore.isPaused);
 
@@ -14,17 +17,17 @@
 <div class="controls">
 	{#if canStart}
 		<button type="button" class="btn btn-primary" onclick={() => timerStore.start()}>
-			Start
+			{t('controls.start')}
 		</button>
 	{/if}
 	{#if canPauseResume}
 		<button type="button" class="btn btn-secondary" onclick={() => timerStore.togglePause()}>
-			{isPaused ? 'Resume' : 'Pause'}
+			{isPaused ? t('controls.resume') : t('controls.pause')}
 		</button>
 	{/if}
 	{#if canReset}
 		<button type="button" class="btn btn-outline" onclick={() => timerStore.reset()}>
-			Reset
+			{t('controls.reset')}
 		</button>
 	{/if}
 </div>
@@ -64,7 +67,6 @@
 		outline-offset: 2px;
 	}
 
-	/* Mobile portrait: larger touch targets */
 	@media (max-width: 640px) and (orientation: portrait) {
 		.controls {
 			gap: 1rem;
@@ -79,7 +81,6 @@
 		}
 	}
 
-	/* Mobile landscape: side by side, easy thumb reach */
 	@media (orientation: landscape) and (max-height: 500px) {
 		.controls {
 			flex-direction: row;
@@ -94,7 +95,6 @@
 		}
 	}
 
-	/* Desktop: fixed min-width, no flex grow */
 	@media (min-width: 641px) {
 		.controls {
 			width: auto;

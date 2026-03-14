@@ -4,16 +4,16 @@ import type { Config } from '$lib/types/timer';
 const STORAGE_KEY = 'box-timer-config';
 
 const DEFAULTS: Config = {
-	exerciseSeconds: 3 * 60, // 3 min
-	restSeconds: 1 * 60, // 1 min
+	exerciseSeconds: 3 * 60,
+	restSeconds: 1 * 60,
 	rounds: 3
 };
 
 const STEP_SECONDS = 15;
 
 const LIMITS = {
-	exerciseSeconds: { min: 30, max: 60 * 60 }, // 30s–60 min
-	restSeconds: { min: 0, max: 10 * 60 }, // 0–10 min
+	exerciseSeconds: { min: 30, max: 60 * 60 },
+	restSeconds: { min: 0, max: 10 * 60 },
 	rounds: { min: 1, max: 99 }
 } as const;
 
@@ -28,7 +28,6 @@ function safeNumber(value: unknown, fallback: number): number {
 	return Number.isFinite(n) ? n : fallback;
 }
 
-/** Normalizes partial or full config into a valid Config with clamped values. */
 function normalizeConfig(raw: Partial<Config>): Config {
 	return {
 		exerciseSeconds: clamp(
@@ -65,7 +64,7 @@ function saveToStorage(config: Config): void {
 	try {
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
 	} catch {
-		// ignore
+		/* noop */
 	}
 }
 

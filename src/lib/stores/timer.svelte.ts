@@ -12,7 +12,6 @@ function createTimerStore() {
 	let isPaused = $state(false);
 	let countdownStepIndex = $state(0);
 
-	/** Config for current workout; when set (preset), overrides configStore. Cleared on reset. */
 	let activeConfig: WorkoutConfig | null = null;
 
 	function getConfig(): WorkoutConfig {
@@ -20,7 +19,7 @@ function createTimerStore() {
 	}
 
 	const TICK_MS = 1000;
-	const COUNTDOWN_TICK_MS = 1000; // 3-2-1 countdown: 1s per number
+	const COUNTDOWN_TICK_MS = 1000;
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
 	function clearTimer() {
@@ -43,18 +42,16 @@ function createTimerStore() {
 			playTenSecondWarning();
 		}
 		if (remainingSeconds > 0) {
-			// Still counting down, schedule next tick
 			scheduleTick(phase === 'countdown');
 			return;
 		}
 
-		// Phase transition when countdown reaches 0
 		clearTimer();
 
 		if (phase === 'countdown') {
 			if (countdownStepIndex < COUNTDOWN_STEPS.length - 1) {
 				countdownStepIndex++;
-				remainingSeconds = 1; // Each step displays for 1 second
+				remainingSeconds = 1;
 				scheduleTick(true);
 			} else {
 				playAlarm('round_end');
@@ -118,7 +115,7 @@ function createTimerStore() {
 			phase = 'countdown';
 			currentRound = 0;
 			countdownStepIndex = 0;
-			remainingSeconds = 1; // Each countdown step (3, 2, 1, Start) displays for 1 second
+			remainingSeconds = 1;
 			isPaused = false;
 			scheduleTick(true);
 		},

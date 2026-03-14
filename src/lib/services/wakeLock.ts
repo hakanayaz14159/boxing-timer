@@ -9,7 +9,7 @@ export async function requestWakeLock(): Promise<boolean> {
 	if (typeof document === 'undefined' || typeof navigator === 'undefined') return false;
 	const nav = navigator as NavigatorWithWakeLock;
 	if (!nav.wakeLock) return false;
-	if (document.hidden) return false; // Can only request when visible
+	if (document.hidden) return false;
 	try {
 		wakeLockSentinel = await nav.wakeLock.request('screen');
 		return true;
@@ -23,7 +23,7 @@ export async function releaseWakeLock(): Promise<void> {
 		try {
 			await wakeLockSentinel.release();
 		} catch {
-			// Ignore release errors
+			/* noop */
 		}
 		wakeLockSentinel = null;
 	}
@@ -33,7 +33,6 @@ export function isWakeLockSupported(): boolean {
 	return typeof navigator !== 'undefined' && 'wakeLock' in navigator;
 }
 
-/** Set whether the wake lock should be held. Handles request/release and visibility changes. */
 export async function setWakeLock(hold: boolean): Promise<void> {
 	if (typeof document === 'undefined' || typeof navigator === 'undefined') return;
 	shouldHoldLock = hold;
@@ -47,10 +46,10 @@ export async function setWakeLock(hold: boolean): Promise<void> {
 function initVisibilityHandler(): void {
 	document.addEventListener('visibilitychange', async () => {
 		if (document.hidden) {
-			await releaseWakeLock(); // Released automatically, but clear our ref
+			await releaseWakeLock();
 			wakeLockSentinel = null;
 		} else if (shouldHoldLock) {
-			await requestWakeLock(); // Re-acquire when tab visible again
+			await requestWakeLock();
 		}
 	});
 }

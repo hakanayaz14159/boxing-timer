@@ -1,6 +1,5 @@
 <script lang="ts">
 	import logo from '$lib/assets/no-bg-logo.png';
-
 </script>
 
 <div class="background-branding" aria-hidden="true">

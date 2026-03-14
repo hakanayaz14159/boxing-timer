@@ -1,0 +1,41 @@
+{
+	"app": {
+		"title": "Boks Kronometresi",
+		"viewOnGitHub": "GitHub'da Görüntüle"
+	},
+	"controls": {
+		"start": "Başla",
+		"resume": "Devam",
+		"pause": "Duraklat",
+		"reset": "Sıfırla"
+	},
+	"config": {
+		"exercise": "Antrenman",
+		"rest": "Dinlenme",
+		"rounds": "Raunt",
+		"decreaseRounds": "Raunt azalt",
+		"increaseRounds": "Raunt artır",
+		"previewBell": "Zili dene",
+		"previewBellTitle": "Raunt bitiş zilini dinle",
+		"quickStart": "Hızlı başlangıç",
+		"custom": "Özel",
+		"configSections": "Yapılandırma bölümleri"
+	},
+	"timer": {
+		"paused": "Duraklatıldı",
+		"done": "Bitti",
+		"getReady": "Hazır Ol",
+		"exercise": "Antrenman",
+		"rest": "Dinlenme",
+		"workoutComplete": "Antrenman Tamamlandı",
+		"round": "Raunt {current} / {total}"
+	},
+	"presets": {
+		"amateur": "Amatör (3×3)",
+		"pro-6": "Pro 6 raunt",
+		"pro-8": "Pro 8 raunt",
+		"pro-12": "Pro 12 raunt",
+		"womens-pro": "Kadınlar Pro",
+		"fitness": "Fitness (2×5)"
+	}
+}

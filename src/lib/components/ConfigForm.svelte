@@ -5,7 +5,11 @@
 	import { LIMITS, STEP_SECONDS } from '$lib/stores/config.svelte';
 	import { BOXING_PRESETS } from '$lib/constants/presets';
 	import { playAlarm } from '$lib/services/sound';
+	import { localeStore, locale } from '$lib/i18n';
 	import { onMount } from 'svelte';
+
+	const t = localeStore.t.bind(localeStore);
+	$locale;
 
 	const isDisabled = $derived(timerStore.phase === 'exercise' || timerStore.phase === 'rest');
 
@@ -56,7 +60,7 @@
 {#snippet configFields(idSuffix: '' | '-landscape')}
 	<div class="field">
 		<div class="field-header">
-			<label for="exercise{idSuffix}">Exercise</label>
+			<label for="exercise{idSuffix}">{t('config.exercise')}</label>
 			<span class="value" aria-live="polite">{formatSeconds(exerciseSeconds)}</span>
 		</div>
 		<input
@@ -76,7 +80,7 @@
 	</div>
 	<div class="field">
 		<div class="field-header">
-			<label for="rest{idSuffix}">Rest</label>
+			<label for="rest{idSuffix}">{t('config.rest')}</label>
 			<span class="value" aria-live="polite">{formatSeconds(restSeconds)}</span>
 		</div>
 		<input
@@ -95,14 +99,14 @@
 		</div>
 	</div>
 	<div class="field">
-		<label for="rounds{idSuffix}">Rounds</label>
+		<label for="rounds{idSuffix}">{t('config.rounds')}</label>
 		<div class="stepper">
 			<button
 				type="button"
 				class="stepper-btn"
 				disabled={isDisabled || rounds <= LIMITS.rounds.min}
 				onclick={() => setRounds(-1)}
-				aria-label="Decrease rounds"
+				aria-label={t('config.decreaseRounds')}
 			>
 				−
 			</button>
@@ -112,7 +116,7 @@
 				class="stepper-btn"
 				disabled={isDisabled || rounds >= LIMITS.rounds.max}
 				onclick={() => setRounds(1)}
-				aria-label="Increase rounds"
+				aria-label={t('config.increaseRounds')}
 			>
 				+
 			</button>
@@ -124,16 +128,16 @@
 			class="preview-btn"
 			disabled={isDisabled}
 			onclick={() => playAlarm('round_end')}
-			title="Preview round-end bell"
+			title={t('config.previewBellTitle')}
 		>
-			Preview bell
+			{t('config.previewBell')}
 		</button>
 	</div>
 {/snippet}
 
 <div class="config-wrapper" class:tabbed={useTabs} class:desktop={!useTabs}>
 	{#if useTabs}
-		<div class="tabs" role="tablist" aria-label="Configuration sections">
+		<div class="tabs" role="tablist" aria-label={t('config.configSections')}>
 			<button
 				type="button"
 				role="tab"
@@ -144,7 +148,7 @@
 				class:active={activeTab === 'presets'}
 				onclick={() => (activeTab = 'presets')}
 			>
-				Quick start
+				{t('config.quickStart')}
 			</button>
 			<button
 				type="button"
@@ -156,7 +160,7 @@
 				class:active={activeTab === 'custom'}
 				onclick={() => (activeTab = 'custom')}
 			>
-				Custom
+				{t('config.custom')}
 			</button>
 		</div>
 		<div class="tab-panels" bind:this={tabPanelsEl}>
@@ -174,9 +178,9 @@
 							class="preset-btn"
 							disabled={isDisabled}
 							onclick={() => timerStore.start(preset.config)}
-							title="Start {preset.label}"
+							title={`${t('controls.start')} ${t(`presets.${preset.id}`)}`}
 						>
-							{preset.label}
+							{t(`presets.${preset.id}`)}
 						</button>
 					{/each}
 				</div>
@@ -195,8 +199,8 @@
 		</div>
 	{:else}
 		<div class="desktop-side-by-side">
-			<section class="presets" aria-label="Quick start presets">
-				<h2 class="presets-title">Quick start</h2>
+			<section class="presets" aria-label={t('config.quickStart')}>
+				<h2 class="presets-title">{t('config.quickStart')}</h2>
 				<div class="presets-grid">
 					{#each BOXING_PRESETS as preset (preset.id)}
 						<button
@@ -204,16 +208,16 @@
 							class="preset-btn"
 							disabled={isDisabled}
 							onclick={() => timerStore.start(preset.config)}
-							title="Start {preset.label}"
+							title={`${t('controls.start')} ${t(`presets.${preset.id}`)}`}
 						>
-							{preset.label}
+							{t(`presets.${preset.id}`)}
 						</button>
 					{/each}
 				</div>
 			</section>
 
 			<form class="config-form" onsubmit={(e) => e.preventDefault()}>
-				<h2 class="config-title">Custom</h2>
+				<h2 class="config-title">{t('config.custom')}</h2>
 				{@render configFields('')}
 			</form>
 		</div>
