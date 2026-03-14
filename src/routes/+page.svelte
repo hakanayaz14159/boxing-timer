@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AppHeader from '$lib/components/AppHeader.svelte';
+	import BackgroundBranding from '$lib/components/BackgroundBranding.svelte';
 	import ConfigForm from '$lib/components/ConfigForm.svelte';
 	import CountdownDisplay from '$lib/components/CountdownDisplay.svelte';
 	import TimerControls from '$lib/components/TimerControls.svelte';
@@ -22,6 +23,7 @@
 		class:countdown-layout={showCountdown}
 		class:config-layout={showConfig}
 	>
+		<BackgroundBranding />
 		{#if showConfig}
 			<div class="config-split">
 				<div class="config-left">
@@ -49,12 +51,13 @@
 	}
 
 	.page {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		height: 100%;
-		overflow: hidden;
+		overflow: visible;
 		background: var(--color-bg);
 		padding: calc(1.5rem + env(safe-area-inset-top, 0)) 1.5rem
 			calc(2rem + env(safe-area-inset-bottom, 0));
@@ -74,6 +77,7 @@
 
 	.timer-center {
 		position: relative;
+		z-index: 1;
 		flex: 1;
 		width: 100%;
 		min-width: 0;
@@ -84,6 +88,8 @@
 	}
 
 	.config-split {
+		position: relative;
+		z-index: 1;
 		display: flex;
 		flex: 1;
 		width: 100%;
