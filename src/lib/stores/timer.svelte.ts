@@ -1,7 +1,7 @@
 import type { TimerPhase, WorkoutConfig } from '$lib/types/timer';
 import { configStore } from './config.svelte';
 import type { BellSignal } from '$lib/services/sound';
-import { playAlarm, preloadBell } from '$lib/services/sound';
+import { playAlarm, playTenSecondWarning, preloadBell } from '$lib/services/sound';
 
 const COUNTDOWN_STEPS: (number | 'Start')[] = [3, 2, 1, 'Start'];
 
@@ -39,6 +39,9 @@ function createTimerStore() {
 		if (remainingSeconds <= 0) return;
 
 		remainingSeconds--;
+		if (remainingSeconds >= 1 && remainingSeconds <= 10 && (phase === 'exercise' || phase === 'rest')) {
+			playTenSecondWarning();
+		}
 		if (remainingSeconds > 0) {
 			// Still counting down, schedule next tick
 			scheduleTick(phase === 'countdown');

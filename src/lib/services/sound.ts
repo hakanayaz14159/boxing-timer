@@ -79,3 +79,34 @@ export async function playAlarm(signal: BellSignal): Promise<void> {
 		console.warn('[sound] Failed to play alarm:', err);
 	}
 }
+
+const TEN_SECOND_BEEP_FREQ = 880;
+const TEN_SECOND_BEEP_DURATION_MS = 180;
+const TEN_SECOND_BEEP_GAIN = 0.9;
+
+/**
+ * Plays a short programmatic beep for the 10-second warning. No audio file needed.
+ * Called every second during the final 10 seconds. Handles errors internally.
+ */
+export async function playTenSecondWarning(): Promise<void> {
+	try {
+		const ctx = getAudioContext();
+		if (ctx.state === 'suspended') {
+			await ctx.resume();
+		}
+
+		const gainNode = ctx.createGain();
+		gainNode.gain.setValueAtTime(TEN_SECOND_BEEP_GAIN, ctx.currentTime);
+		gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + TEN_SECOND_BEEP_DURATION_MS / 1000);
+		gainNode.connect(ctx.destination);
+
+		const osc = ctx.createOscillator();
+		osc.type = 'sine';
+		osc.frequency.value = TEN_SECOND_BEEP_FREQ;
+		osc.connect(gainNode);
+		osc.start(ctx.currentTime);
+		osc.stop(ctx.currentTime + TEN_SECOND_BEEP_DURATION_MS / 1000);
+	} catch (err) {
+		console.warn('[sound] Failed to play 10-second warning:', err);
+	}
+}
