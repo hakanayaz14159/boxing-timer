@@ -1,7 +1,7 @@
 import type { TimerPhase, WorkoutConfig } from '$lib/types/timer';
 import { configStore } from './config.svelte';
 import type { BellSignal } from '$lib/services/sound';
-import { playAlarm } from '$lib/services/sound';
+import { playAlarm, preloadBell } from '$lib/services/sound';
 
 const COUNTDOWN_STEPS: (number | 'Start')[] = [3, 2, 1, 'Start'];
 
@@ -78,6 +78,7 @@ function createTimerStore() {
 		}
 
 		if (phase === 'rest') {
+			playAlarm('round_end');
 			currentRound++;
 			phase = 'exercise';
 			remainingSeconds = getConfig().exerciseSeconds;
@@ -108,6 +109,7 @@ function createTimerStore() {
 			return getConfig();
 		},
 		start(config?: WorkoutConfig) {
+			preloadBell();
 			clearTimer();
 			activeConfig = config ?? null;
 			phase = 'countdown';

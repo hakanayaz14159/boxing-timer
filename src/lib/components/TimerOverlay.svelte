@@ -1,0 +1,125 @@
+<script lang="ts">
+	import TimerControls from '$lib/components/TimerControls.svelte';
+	import { timerStore } from '$lib/stores/timer.svelte';
+
+	const phase = $derived(timerStore.phase);
+	const phaseLabel = $derived.by(() => {
+		if (phase === 'exercise') return 'Exercise';
+		if (phase === 'rest') return 'Rest';
+		if (phase === 'countdown') return 'Get Ready';
+		if (phase === 'finished') return 'Workout Complete';
+		return '';
+	});
+	const showRound = $derived(phase === 'exercise' || phase === 'rest');
+</script>
+
+<div class="overlay">
+	<div class="top-info">
+		{#if phaseLabel}
+			<span class="phase-label">{phaseLabel}</span>
+		{/if}
+		{#if showRound}
+			<span class="round">Round {timerStore.currentRound} / {timerStore.activeConfig.rounds}</span>
+		{/if}
+	</div>
+	<div class="controls-wrapper">
+		<TimerControls />
+	</div>
+</div>
+
+<style>
+	.overlay {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: space-between;
+		padding: calc(5rem + env(safe-area-inset-top, 0)) 1.5rem calc(2rem + env(safe-area-inset-bottom, 0));
+	}
+
+	.overlay > * {
+		pointer-events: auto;
+	}
+
+	.top-info {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.phase-label {
+		font-size: clamp(0.875rem, 2.5vw, 1.25rem);
+		color: var(--color-text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+	}
+
+	.round {
+		font-size: clamp(1.25rem, 4vw, 2rem);
+		font-weight: 700;
+		font-family: var(--font-display, system-ui, sans-serif);
+		color: var(--color-text);
+	}
+
+	.controls-wrapper {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+	}
+
+	.controls-wrapper :global(.controls) {
+		flex-direction: row;
+		width: 100%;
+		max-width: 24rem;
+		gap: 0.875rem;
+	}
+
+	.controls-wrapper :global(.btn) {
+		min-height: 64px;
+		font-size: 1.25rem;
+		padding: 1rem 1.5rem;
+	}
+
+	@media (max-width: 640px) and (orientation: portrait) {
+		.overlay {
+			padding: calc(5rem + env(safe-area-inset-top, 0)) 0.75rem
+				calc(1.5rem + env(safe-area-inset-bottom, 0));
+		}
+
+		.controls-wrapper :global(.controls) {
+			max-width: none;
+			flex-direction: row;
+			justify-content: center;
+			gap: 1rem;
+		}
+
+		.controls-wrapper :global(.btn) {
+			min-height: 72px;
+			font-size: 1.375rem;
+			padding: 1rem 1.5rem;
+		}
+	}
+
+	@media (orientation: landscape) and (max-height: 500px) {
+		.overlay {
+			padding: calc(3rem + env(safe-area-inset-top, 0)) 1rem
+				calc(0.75rem + env(safe-area-inset-bottom, 0));
+		}
+
+		.controls-wrapper :global(.controls) {
+			max-width: none;
+			flex-direction: row;
+			gap: 0.75rem;
+			justify-content: center;
+		}
+
+		.controls-wrapper :global(.btn) {
+			min-height: 56px;
+			font-size: 1.125rem;
+			padding: 0.75rem 1.25rem;
+		}
+	}
+</style>

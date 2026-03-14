@@ -3,6 +3,7 @@
 	import ConfigForm from '$lib/components/ConfigForm.svelte';
 	import CountdownDisplay from '$lib/components/CountdownDisplay.svelte';
 	import TimerControls from '$lib/components/TimerControls.svelte';
+	import TimerOverlay from '$lib/components/TimerOverlay.svelte';
 	import { timerStore } from '$lib/stores/timer.svelte';
 
 	const phase = $derived(timerStore.phase);
@@ -10,16 +11,6 @@
 	const showCountdown = $derived(
 		phase === 'countdown' || phase === 'exercise' || phase === 'rest' || phase === 'finished'
 	);
-
-	const phaseLabel = $derived.by(() => {
-		if (phase === 'exercise') return 'Exercise';
-		if (phase === 'rest') return 'Rest';
-		if (phase === 'countdown') return 'Get Ready';
-		if (phase === 'finished') return 'Workout Complete';
-		return '';
-	});
-
-	const showRound = $derived(phase === 'exercise' || phase === 'rest');
 </script>
 
 <div class="page-wrapper">
@@ -42,24 +33,9 @@
 			</div>
 		{/if}
 		{#if showCountdown}
-			<div class="countdown-split">
-				<div class="countdown-left">
-					<CountdownDisplay />
-				</div>
-				<div class="countdown-right">
-					<div class="right-info">
-						{#if phaseLabel}
-							<span class="phase-label">{phaseLabel}</span>
-						{/if}
-						{#if showRound}
-							<span class="round"
-								>Round {timerStore.currentRound} / {timerStore.activeConfig.rounds}</span
-							>
-						{/if}
-					</div>
-					<div class="controls-divider"></div>
-					<TimerControls />
-				</div>
+			<div class="timer-center">
+				<CountdownDisplay />
+				<TimerOverlay />
 			</div>
 		{/if}
 	</main>
@@ -85,14 +61,28 @@
 		transition: background 0.3s ease;
 	}
 
-	.page.countdown-layout,
+	.page.countdown-layout {
+		padding: 0;
+		justify-content: center;
+	}
+
 	.page.config-layout {
 		padding: calc(1.5rem + env(safe-area-inset-top, 0)) 1rem
 			calc(1rem + env(safe-area-inset-bottom, 0));
 		justify-content: stretch;
 	}
 
-	.countdown-split,
+	.timer-center {
+		position: relative;
+		flex: 1;
+		width: 100%;
+		min-width: 0;
+		min-height: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
 	.config-split {
 		display: flex;
 		flex: 1;
@@ -102,69 +92,17 @@
 		align-self: stretch;
 	}
 
-	.countdown-split {
-		gap: 1rem;
-	}
-
-	.countdown-left {
-		flex: 0 0 70%;
-		min-width: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.countdown-right {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 1rem;
-		min-width: 0;
-	}
-
-	.countdown-right .phase-label {
-		font-size: clamp(0.875rem, 2.5vw, 1.25rem);
-		color: var(--color-text-muted);
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-	}
-
-	.countdown-right .round {
-		font-size: clamp(1.25rem, 4vw, 2rem);
-		font-weight: 700;
-		font-family: var(--font-display, system-ui, sans-serif);
-		color: var(--color-text);
-	}
-
-	.right-info {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.25rem;
-	}
-
-	.controls-divider {
-		width: 100%;
-		max-width: 12rem;
-		height: 0;
-		border-top: 1px solid var(--color-border);
-		flex-shrink: 0;
-	}
-
-	.countdown-right :global(.controls),
 	.config-right :global(.controls) {
-		flex-direction: column;
+		flex-direction: row;
 		width: 100%;
-		max-width: 12rem;
+		max-width: 24rem;
+		gap: 0.875rem;
 	}
 
-	.countdown-right :global(.btn-primary),
-	.config-right :global(.btn-primary) {
-		min-height: 56px;
+	.config-right :global(.btn) {
+		min-height: 64px;
 		font-size: 1.25rem;
-		padding: 0.875rem 1.5rem;
+		padding: 1rem 1.5rem;
 	}
 
 	.page.phase-exercise {
@@ -180,31 +118,24 @@
 			padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0));
 		}
 
-		.page.countdown-layout,
 		.page.config-layout {
 			padding: calc(1.5rem + env(safe-area-inset-top, 0)) 0.75rem
 				calc(1rem + env(safe-area-inset-bottom, 0));
 		}
 
-		.countdown-split,
 		.config-split {
 			flex-direction: column;
 			gap: 0.75rem;
 		}
 
-		.countdown-left,
 		.config-left {
 			flex: 1;
 			min-height: 0;
 			overflow: hidden;
-		}
-
-		.config-left {
 			align-items: stretch;
 			justify-content: flex-start;
 		}
 
-		.countdown-right,
 		.config-right {
 			flex-shrink: 0;
 			flex-direction: row;
@@ -213,34 +144,17 @@
 			gap: 0.75rem;
 		}
 
-		.countdown-right .right-info {
-			width: 100%;
-			flex-direction: row;
-			justify-content: center;
-			flex-wrap: wrap;
-		}
-
-		.countdown-right .controls-divider {
-			width: 100%;
-			max-width: none;
-		}
-
-		.countdown-right :global(.controls) {
-			max-width: none;
-			flex-direction: row;
-			justify-content: center;
-		}
-
 		.config-right :global(.controls) {
 			max-width: none;
 			flex-direction: row;
 			justify-content: center;
+			gap: 1rem;
 		}
 
-		.countdown-right :global(.btn-primary),
-		.config-right :global(.btn-primary) {
-			min-height: 64px;
+		.config-right :global(.btn) {
+			min-height: 72px;
 			font-size: 1.375rem;
+			padding: 1rem 1.5rem;
 		}
 	}
 
@@ -249,16 +163,9 @@
 			padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0));
 		}
 
-		.page.countdown-layout,
 		.page.config-layout {
 			padding: calc(0.5rem + env(safe-area-inset-top, 0)) 1rem
 				calc(0.25rem + env(safe-area-inset-bottom, 0));
-		}
-
-		.countdown-split {
-			display: grid;
-			grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
-			gap: 0.5rem;
 		}
 
 		.config-split {
@@ -282,31 +189,19 @@
 			justify-content: stretch;
 		}
 
-		.countdown-left,
-		.countdown-right {
-			min-width: 0;
-		}
-
-		.countdown-left {
-			overflow: hidden;
-		}
-
-		.countdown-right :global(.controls) {
-			max-width: none;
-			flex-direction: column;
-		}
-
 		.config-right :global(.controls) {
 			width: 100%;
 			max-width: none;
 			flex-direction: row;
-			justify-content: stretch;
+			justify-content: center;
+			gap: 0.75rem;
 		}
 
-		.config-right :global(.btn-primary) {
+		.config-right :global(.btn) {
 			flex: 1;
-			min-height: 44px;
+			min-height: 56px;
 			font-size: 1.125rem;
+			padding: 0.75rem 1.25rem;
 		}
 	}
 

@@ -42,9 +42,9 @@
 	.btn {
 		flex: 1;
 		min-width: 0;
-		min-height: 48px;
-		padding: 0.75rem 1.5rem;
-		font-size: 1rem;
+		min-height: 56px;
+		padding: 0.875rem 1.5rem;
+		font-size: 1.125rem;
 		font-weight: 600;
 		border-radius: var(--radius-md);
 		cursor: pointer;
@@ -71,25 +71,26 @@
 		}
 
 		.btn {
-			min-height: 56px;
-			min-width: 80px;
+			min-height: 64px;
+			min-width: 100px;
 			flex: 1 1 0;
-			font-size: 1.0625rem;
+			font-size: 1.25rem;
+			padding: 1rem 1.5rem;
 		}
 	}
 
-	/* Mobile landscape: full-width, easy thumb reach at bottom */
+	/* Mobile landscape: side by side, easy thumb reach */
 	@media (orientation: landscape) and (max-height: 500px) {
 		.controls {
 			flex-direction: row;
-			gap: 0.5rem;
+			gap: 0.75rem;
 		}
 
 		.btn {
-			min-height: 52px;
+			min-height: 56px;
 			flex: 1;
-			font-size: 0.9375rem;
-			padding: 0.625rem 1rem;
+			font-size: 1.125rem;
+			padding: 0.75rem 1.25rem;
 		}
 	}
 
@@ -101,7 +102,7 @@
 
 		.btn {
 			flex: none;
-			min-width: 48px;
+			min-width: 56px;
 		}
 	}
 

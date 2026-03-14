@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { formatSeconds } from '$lib/utils/format';
 	import { timerStore } from '$lib/stores/timer.svelte';
 
 	const displayText = $derived.by(() => {
@@ -7,7 +8,7 @@
 			return String(timerStore.countdownDisplay);
 		}
 		if (phase === 'exercise' || phase === 'rest') {
-			return String(timerStore.remainingSeconds);
+			return formatSeconds(timerStore.remainingSeconds);
 		}
 		if (phase === 'finished') {
 			return 'Done';

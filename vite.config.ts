@@ -10,6 +10,12 @@ export default defineConfig({
 			kit: {
 				adapterFallback: '404.html'
 			},
+			workbox: {
+				globPatterns: [
+					'client/**/*.{js,css,ico,png,svg,webp,webmanifest,mp3}',
+					'prerendered/**/*.{html,json}'
+				]
+			},
 			manifest: {
 				name: 'Boxing Timer',
 				short_name: 'Box Timer',
