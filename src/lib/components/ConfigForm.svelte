@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ScrollPicker from '$lib/components/ScrollPicker.svelte';
 	import { configStore } from '$lib/stores/config.svelte';
 	import { timerStore } from '$lib/stores/timer.svelte';
 	import { formatSeconds } from '$lib/utils/format';
@@ -16,10 +17,32 @@
 	let activeTab = $state<'presets' | 'custom'>('presets');
 	let useTabs = $state(false);
 	let tabPanelsEl: HTMLDivElement | undefined = $state();
+	let editModalField = $state<'exercise' | 'rest' | null>(null);
+	let modalDraftValue = $state(0);
+	let modalDialogEl: HTMLDialogElement | undefined = $state();
 
 	$effect(() => {
 		void activeTab;
 		tabPanelsEl?.scrollTo({ top: 0 });
+	});
+
+	$effect(() => {
+		if (editModalField === null) {
+			document.body.style.overflow = '';
+		} else {
+			document.body.style.overflow = 'hidden';
+			modalDraftValue =
+				editModalField === 'exercise' ? configStore.value.exerciseSeconds : configStore.value.restSeconds;
+		}
+		return () => {
+			document.body.style.overflow = '';
+		};
+	});
+
+	$effect(() => {
+		if (editModalField && modalDialogEl && typeof document !== 'undefined') {
+			modalDialogEl.showModal();
+		}
 	});
 
 	onMount(() => {
@@ -55,48 +78,88 @@
 			rounds: Math.max(LIMITS.rounds.min, Math.min(LIMITS.rounds.max, rounds + delta))
 		});
 	}
+
+	function openEditModal(field: 'exercise' | 'rest') {
+		if (isDisabled) return;
+		editModalField = field;
+	}
+
+	function closeEditModal() {
+		modalDialogEl?.close();
+		editModalField = null;
+	}
+
+	function confirmEditModal() {
+		if (editModalField === 'exercise') {
+			setExercise(modalDraftValue);
+		} else if (editModalField === 'rest') {
+			setRest(modalDraftValue);
+		}
+		closeEditModal();
+	}
+
+	function handleModalKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			e.preventDefault();
+			closeEditModal();
+		}
+	}
 </script>
 
-{#snippet configFields(idSuffix: '' | '-landscape')}
+{#snippet configFields(idSuffix: '' | '-landscape', useModal: boolean)}
 	<div class="field">
 		<div class="field-header">
 			<label for="exercise{idSuffix}">{t('config.exercise')}</label>
 			<span class="value" aria-live="polite">{formatSeconds(exerciseSeconds)}</span>
 		</div>
-		<input
-			id="exercise{idSuffix}"
-			type="range"
-			min={LIMITS.exerciseSeconds.min}
-			max={LIMITS.exerciseSeconds.max}
-			step={STEP_SECONDS}
-			value={exerciseSeconds}
-			disabled={isDisabled}
-			oninput={(e) => setExercise(+(e.currentTarget as HTMLInputElement).value)}
-		/>
-		<div class="range-labels">
-			<span>{formatSeconds(LIMITS.exerciseSeconds.min)}</span>
-			<span>{formatSeconds(LIMITS.exerciseSeconds.max)}</span>
-		</div>
+		{#if useModal}
+			<button
+				type="button"
+				class="edit-btn"
+				disabled={isDisabled}
+				onclick={() => openEditModal('exercise')}
+				aria-label="{t('config.edit')} {t('config.exercise')}"
+			>
+				{t('config.edit')}
+			</button>
+		{:else}
+			<ScrollPicker
+				id="exercise{idSuffix}"
+				min={LIMITS.exerciseSeconds.min}
+				max={LIMITS.exerciseSeconds.max}
+				step={STEP_SECONDS}
+				value={exerciseSeconds}
+				disabled={isDisabled}
+				onchange={(v) => setExercise(v)}
+			/>
+		{/if}
 	</div>
 	<div class="field">
 		<div class="field-header">
 			<label for="rest{idSuffix}">{t('config.rest')}</label>
 			<span class="value" aria-live="polite">{formatSeconds(restSeconds)}</span>
 		</div>
-		<input
-			id="rest{idSuffix}"
-			type="range"
-			min={LIMITS.restSeconds.min}
-			max={LIMITS.restSeconds.max}
-			step={STEP_SECONDS}
-			value={restSeconds}
-			disabled={isDisabled}
-			oninput={(e) => setRest(+(e.currentTarget as HTMLInputElement).value)}
-		/>
-		<div class="range-labels">
-			<span>{formatSeconds(LIMITS.restSeconds.min)}</span>
-			<span>{formatSeconds(LIMITS.restSeconds.max)}</span>
-		</div>
+		{#if useModal}
+			<button
+				type="button"
+				class="edit-btn"
+				disabled={isDisabled}
+				onclick={() => openEditModal('rest')}
+				aria-label="{t('config.edit')} {t('config.rest')}"
+			>
+				{t('config.edit')}
+			</button>
+		{:else}
+			<ScrollPicker
+				id="rest{idSuffix}"
+				min={LIMITS.restSeconds.min}
+				max={LIMITS.restSeconds.max}
+				step={STEP_SECONDS}
+				value={restSeconds}
+				disabled={isDisabled}
+				onchange={(v) => setRest(v)}
+			/>
+		{/if}
 	</div>
 	<div class="field">
 		<label for="rounds{idSuffix}">{t('config.rounds')}</label>
@@ -193,7 +256,7 @@
 				hidden={activeTab !== 'custom'}
 			>
 				<form class="config-form" onsubmit={(e) => e.preventDefault()}>
-					{@render configFields('-landscape')}
+					{@render configFields('-landscape', useTabs)}
 				</form>
 			</div>
 		</div>
@@ -218,11 +281,44 @@
 
 			<form class="config-form" onsubmit={(e) => e.preventDefault()}>
 				<h2 class="config-title">{t('config.custom')}</h2>
-				{@render configFields('')}
+				{@render configFields('', false)}
 			</form>
 		</div>
 	{/if}
 </div>
+
+{#if editModalField}
+	<dialog
+		class="time-modal"
+		bind:this={modalDialogEl}
+		aria-modal="true"
+		aria-labelledby="time-modal-title"
+		onkeydown={handleModalKeydown}
+		oncancel={(e) => { e.preventDefault(); closeEditModal(); }}
+	>
+		<div class="time-modal-content">
+			<h2 id="time-modal-title" class="time-modal-title">
+				{editModalField === 'exercise' ? t('config.exercise') : t('config.rest')}
+			</h2>
+			<ScrollPicker
+				min={editModalField === 'exercise' ? LIMITS.exerciseSeconds.min : LIMITS.restSeconds.min}
+				max={editModalField === 'exercise' ? LIMITS.exerciseSeconds.max : LIMITS.restSeconds.max}
+				step={STEP_SECONDS}
+				value={modalDraftValue}
+				disabled={isDisabled}
+				onchange={(v) => (modalDraftValue = v)}
+			/>
+			<div class="time-modal-actions">
+				<button type="button" class="modal-btn modal-cancel" onclick={closeEditModal}>
+					{t('config.cancel')}
+				</button>
+				<button type="button" class="modal-btn modal-confirm" onclick={confirmEditModal}>
+					{t('config.done')}
+				</button>
+			</div>
+		</div>
+	</dialog>
+{/if}
 
 <style>
 	.config-wrapper {
@@ -243,15 +339,18 @@
 	}
 
 	.config-wrapper.desktop {
-		max-width: 42rem;
+		max-width: 56rem;
 	}
 
 	.desktop-side-by-side {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 2rem;
+		grid-template-columns: minmax(14rem, 17rem) minmax(18rem, 22rem);
+		justify-content: center;
+		align-items: start;
+		gap: 1.5rem;
 		width: 100%;
 		min-width: 0;
+		max-width: 48rem;
 	}
 
 	.tabs {
@@ -292,7 +391,7 @@
 		min-width: 0;
 		min-height: 0;
 		overflow-y: auto;
-		padding: 1rem 12px 1rem;
+		padding: 1rem 12px 1.25rem;
 	}
 
 	.tab-panel {
@@ -300,7 +399,23 @@
 	}
 
 	.config-wrapper.tabbed .config-form {
-		gap: 1.5rem;
+		gap: 1.25rem;
+	}
+
+	.config-wrapper.tabbed .field {
+		gap: 0.75rem;
+	}
+
+	.config-wrapper.desktop .presets,
+	.config-wrapper.desktop .config-form {
+		background: color-mix(in srgb, var(--color-bg-input) 85%, transparent);
+		border: 1px solid var(--color-border);
+		border-radius: calc(var(--radius-md) + 2px);
+		padding: 0.9rem;
+	}
+
+	.config-wrapper.desktop .config-form {
+		gap: 1rem;
 	}
 
 	@media (orientation: landscape) and (max-height: 500px) {
@@ -311,8 +426,8 @@
 		}
 
 		.config-wrapper.tabbed .tab-panels {
-			padding: 0.25rem 8px 0;
-			overflow: hidden;
+			padding: 0.375rem 8px 0.25rem;
+			overflow-y: auto;
 		}
 
 		.config-wrapper.tabbed .presets-grid {
@@ -326,34 +441,16 @@
 		}
 
 		.config-wrapper.tabbed .config-form {
-			gap: 0.375rem;
+			gap: 0.5rem;
 		}
 
 		.config-wrapper.tabbed .field {
-			gap: 0.125rem;
+			gap: 0.25rem;
 		}
 
 		.config-wrapper.tabbed .field label,
 		.config-wrapper.tabbed .value {
 			font-size: 0.75rem;
-		}
-
-		.config-wrapper.tabbed .range-labels {
-			font-size: 0.625rem;
-		}
-
-		.config-wrapper.tabbed input[type='range'] {
-			height: 5px;
-		}
-
-		.config-wrapper.tabbed input[type='range']::-webkit-slider-thumb {
-			width: 14px;
-			height: 14px;
-		}
-
-		.config-wrapper.tabbed input[type='range']::-moz-range-thumb {
-			width: 14px;
-			height: 14px;
 		}
 
 		.config-wrapper.tabbed .stepper {
@@ -433,7 +530,7 @@
 	.field {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: 0.65rem;
 	}
 
 	.field-header {
@@ -455,61 +552,6 @@
 		font-weight: 700;
 		color: var(--color-primary);
 		flex-shrink: 0;
-	}
-
-	.range-labels {
-		display: flex;
-		justify-content: space-between;
-		font-size: 0.75rem;
-		color: var(--color-text-muted);
-	}
-
-	input[type='range'] {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 100%;
-		min-width: 0;
-		height: 8px;
-		border-radius: 4px;
-		background: var(--color-border);
-		outline: none;
-	}
-
-	input[type='range']::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 24px;
-		height: 24px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		transition: transform 0.15s;
-	}
-
-	input[type='range']::-webkit-slider-thumb:hover {
-		transform: scale(1.1);
-	}
-
-	input[type='range']::-moz-range-thumb {
-		width: 24px;
-		height: 24px;
-		border-radius: 50%;
-		background: var(--color-primary);
-		cursor: pointer;
-		border: none;
-	}
-
-	input[type='range']:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	input[type='range']:disabled::-webkit-slider-thumb {
-		cursor: not-allowed;
-	}
-
-	input[type='range']:disabled::-moz-range-thumb {
-		cursor: not-allowed;
 	}
 
 	.stepper {
@@ -581,5 +623,107 @@
 	.preview-btn:disabled {
 		opacity: 0.6;
 		cursor: not-allowed;
+	}
+
+	.edit-btn {
+		min-height: 44px;
+		padding: 0.5rem 1rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		background: var(--color-bg-input);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		color: var(--color-primary);
+		cursor: pointer;
+		transition: background 0.15s, border-color 0.15s;
+	}
+
+	.edit-btn:hover:not(:disabled) {
+		background: var(--color-bg-hover);
+		border-color: var(--color-primary);
+	}
+
+	.edit-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.time-modal {
+		position: fixed;
+		inset: 0;
+		width: 100%;
+		max-width: 100%;
+		height: 100%;
+		max-height: 100%;
+		margin: 0;
+		padding: 0;
+		border: none;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.time-modal::backdrop {
+		background: rgba(0, 0, 0, 0.5);
+	}
+
+	.time-modal-content {
+		background: var(--color-bg);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		padding: 1.25rem;
+		max-width: min(20rem, 90vw);
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+	}
+
+	.time-modal-title {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		margin: 0;
+	}
+
+	.time-modal-actions {
+		display: flex;
+		gap: 0.75rem;
+		justify-content: flex-end;
+		margin-top: 0.25rem;
+	}
+
+	.modal-btn {
+		min-height: 44px;
+		padding: 0.5rem 1.25rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		border-radius: var(--radius-md);
+		cursor: pointer;
+		transition: background 0.15s, border-color 0.15s;
+	}
+
+	.modal-cancel {
+		background: var(--color-bg-input);
+		border: 1px solid var(--color-border);
+		color: var(--color-text);
+	}
+
+	.modal-cancel:hover {
+		background: var(--color-bg-hover);
+	}
+
+	.modal-confirm {
+		background: var(--color-primary);
+		border: 1px solid var(--color-primary);
+		color: white;
+	}
+
+	.modal-confirm:hover {
+		opacity: 0.9;
 	}
 </style>

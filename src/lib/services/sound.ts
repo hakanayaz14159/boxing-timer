@@ -2,7 +2,7 @@ import boxBellUrl from '$lib/assets/box_bell.mp3?url';
 
 export type BellSignal = 'round_end' | 'workout_complete';
 
-const THREE_BELLS_OFFSET = 17;
+const THREE_BELLS_OFFSET = 17.5;
 
 const BELL_OFFSETS: Record<BellSignal, number> = {
 	round_end: THREE_BELLS_OFFSET,

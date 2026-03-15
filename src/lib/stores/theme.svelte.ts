@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { writable, derived, get } from 'svelte/store';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 
@@ -57,39 +58,44 @@ function getSystemPrefersDark(): boolean {
 	return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
-function createThemeStore() {
-	let preference = $state<ThemePreference>(loadFromStorage());
-	let systemDark = $state(getSystemPrefersDark());
+const preference = writable<ThemePreference>(loadFromStorage());
+const systemDark = writable(getSystemPrefersDark());
 
-	if (browser) {
-		const mq = window.matchMedia('(prefers-color-scheme: dark)');
-		mq.addEventListener('change', () => {
-			systemDark = mq.matches;
-		});
-	}
-
-	const effectiveTheme = $derived.by((): 'light' | 'dark' => {
-		if (preference === 'system') return systemDark ? 'dark' : 'light';
-		return preference;
+if (browser) {
+	preference.subscribe((value) => {
+		saveToStorage(value);
 	});
 
-	const themeColor = $derived(effectiveTheme === 'light' ? LIGHT_COLORS.bg : DARK_COLORS.bg);
-
-	return {
-		get preference() {
-			return preference;
-		},
-		set preference(value: ThemePreference) {
-			preference = value;
-			saveToStorage(value);
-		},
-		get effectiveTheme() {
-			return effectiveTheme;
-		},
-		get themeColor() {
-			return themeColor;
-		}
-	};
+	const mq = window.matchMedia('(prefers-color-scheme: dark)');
+	mq.addEventListener('change', () => {
+		systemDark.set(mq.matches);
+	});
 }
 
-export const themeStore = createThemeStore();
+export const effectiveTheme = derived(
+	[preference, systemDark],
+	([$preference, $systemDark]): 'light' | 'dark' => {
+		if ($preference === 'system') return $systemDark ? 'dark' : 'light';
+		return $preference;
+	}
+);
+
+export const themeColor = derived(effectiveTheme, ($effective) =>
+	$effective === 'light' ? LIGHT_COLORS.bg : DARK_COLORS.bg
+);
+
+export const themeStore = {
+	get preference() {
+		return get(preference);
+	},
+	set preference(value: ThemePreference) {
+		preference.set(value);
+	},
+	get effectiveTheme() {
+		return get(effectiveTheme);
+	},
+	get themeColor() {
+		return get(themeColor);
+	},
+	subscribe: preference.subscribe
+};

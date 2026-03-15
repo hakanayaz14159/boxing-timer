@@ -93,9 +93,13 @@
 		display: flex;
 		flex: 1;
 		width: 100%;
+		max-width: 68rem;
+		margin: 0 auto;
 		min-width: 0;
 		min-height: 0;
 		align-self: stretch;
+		gap: 1.5rem;
+		align-items: stretch;
 	}
 
 	.config-right :global(.controls) {
@@ -125,13 +129,14 @@
 		}
 
 		.page.config-layout {
-			padding: calc(1.5rem + env(safe-area-inset-top, 0)) 0.75rem
+			padding: calc(1rem + env(safe-area-inset-top, 0)) 0.75rem
 				calc(1rem + env(safe-area-inset-bottom, 0));
 		}
 
 		.config-split {
 			flex-direction: column;
 			gap: 0.75rem;
+			min-height: 0;
 		}
 
 		.config-left {
@@ -170,13 +175,14 @@
 		}
 
 		.page.config-layout {
-			padding: calc(0.5rem + env(safe-area-inset-top, 0)) 1rem
+			padding: calc(0.5rem + env(safe-area-inset-top, 0)) 0.75rem
 				calc(0.25rem + env(safe-area-inset-bottom, 0));
 		}
 
 		.config-split {
 			flex-direction: column;
-			gap: 0.125rem;
+			gap: 0.5rem;
+			min-height: 0;
 		}
 
 		.config-left {
@@ -211,12 +217,8 @@
 		}
 	}
 
-	.config-split {
-		gap: 1rem;
-	}
-
 	.config-left {
-		flex: 0 0 70%;
+		flex: 1 1 auto;
 		min-width: 0;
 		display: flex;
 		align-items: center;
@@ -225,7 +227,7 @@
 	}
 
 	.config-right {
-		flex: 1;
+		flex: 0 0 min(22rem, 34%);
 		display: flex;
 		flex-direction: column;
 		align-items: center;

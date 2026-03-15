@@ -7,6 +7,7 @@
 	$locale;
 	const phase = $derived(timerStore.phase);
 	const phaseLabel = $derived.by(() => {
+		void $locale;
 		if (phase === 'exercise') return t('timer.exercise');
 		if (phase === 'rest') return t('timer.rest');
 		if (phase === 'countdown') return t('timer.getReady');

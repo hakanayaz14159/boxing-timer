@@ -5,7 +5,7 @@
 	import { pwaInfo } from 'virtual:pwa-info';
 	import { registerSW } from 'virtual:pwa-register';
 	import { timerStore } from '$lib/stores/timer.svelte';
-	import { themeStore } from '$lib/stores/theme.svelte';
+	import { themeStore, effectiveTheme, themeColor } from '$lib/stores/theme.svelte';
 	import { locale } from '$lib/i18n';
 	import { setWakeLock, ensureVisibilityHandler } from '$lib/services/wakeLock';
 	import '../app.css';
@@ -20,8 +20,8 @@
 	});
 
 	$effect(() => {
-		const pref = themeStore.preference;
-		const effective = themeStore.effectiveTheme;
+		const pref = $themeStore;
+		const effective = $effectiveTheme;
 		const doc = typeof document !== 'undefined' ? document.documentElement : null;
 		if (doc) {
 			if (pref === 'system') {
@@ -48,11 +48,11 @@
 <svelte:head>
 	<link rel="icon" href={favicon} />
 	<link rel="apple-touch-icon" href={`${base}/icons/icon-180.png`} />
-	{#if themeStore.preference === 'system'}
+	{#if $themeStore === 'system'}
 		<meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
 		<meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
 	{:else}
-		<meta name="theme-color" content={themeStore.themeColor} />
+		<meta name="theme-color" content={$themeColor} />
 	{/if}
 	{#if pwaInfo?.webManifest?.linkTag}
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -- PWA manifest link from trusted build-time plugin -->
@@ -60,4 +60,6 @@
 	{/if}
 </svelte:head>
 
-{@render children()}
+{#key $locale}
+	{@render children()}
+{/key}

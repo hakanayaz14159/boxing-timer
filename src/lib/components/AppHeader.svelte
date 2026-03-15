@@ -7,7 +7,7 @@
 
 	const t = localeStore.t.bind(localeStore);
 	$locale;
-	const pref = $derived(themeStore.preference);
+	$themeStore;
 
 	function setTheme(p: ThemePreference) {
 		themeStore.preference = p;
@@ -25,9 +25,9 @@
 			<button
 				type="button"
 				class="theme-btn"
-				class:active={pref === 'light'}
+				class:active={$themeStore === 'light'}
 				onclick={() => setTheme('light')}
-				aria-pressed={pref === 'light'}
+				aria-pressed={$themeStore === 'light'}
 				title="Light theme"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
@@ -35,9 +35,9 @@
 			<button
 				type="button"
 				class="theme-btn"
-				class:active={pref === 'system'}
+				class:active={$themeStore === 'system'}
 				onclick={() => setTheme('system')}
-				aria-pressed={pref === 'system'}
+				aria-pressed={$themeStore === 'system'}
 				title="System theme"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
@@ -45,9 +45,9 @@
 			<button
 				type="button"
 				class="theme-btn"
-				class:active={pref === 'dark'}
+				class:active={$themeStore === 'dark'}
 				onclick={() => setTheme('dark')}
-				aria-pressed={pref === 'dark'}
+				aria-pressed={$themeStore === 'dark'}
 				title="Dark theme"
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>

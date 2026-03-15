@@ -6,6 +6,7 @@
 	const t = localeStore.t.bind(localeStore);
 	$locale;
 	const displayText = $derived.by(() => {
+		void $locale;
 		const phase = timerStore.phase;
 		if (phase === 'countdown') {
 			const raw = timerStore.countdownDisplay;
@@ -25,9 +26,10 @@
 		isPaused && (timerStore.phase === 'exercise' || timerStore.phase === 'rest')
 	);
 
-	const isLongText = $derived(
-		displayText === t('controls.start') || displayText === t('timer.done')
-	);
+	const isLongText = $derived.by(() => {
+		void $locale;
+		return displayText === t('controls.start') || displayText === t('timer.done');
+	});
 </script>
 
 <div class="countdown" aria-live="polite" aria-atomic="true">

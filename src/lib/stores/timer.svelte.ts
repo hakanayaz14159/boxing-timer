@@ -37,6 +37,15 @@ function createTimerStore() {
 	function tick() {
 		if (remainingSeconds <= 0) return;
 
+		// Ring 1 second before transition (check before decrement for 1-second phases)
+		if (remainingSeconds === 1 && (phase === 'exercise' || phase === 'rest')) {
+			const signal: BellSignal =
+				phase === 'exercise' && currentRound >= getConfig().rounds
+					? 'workout_complete'
+					: 'round_end';
+			playAlarm(signal);
+		}
+
 		remainingSeconds--;
 		if (remainingSeconds >= 1 && remainingSeconds <= 10 && (phase === 'exercise' || phase === 'rest')) {
 			playTenSecondWarning();
@@ -52,37 +61,71 @@ function createTimerStore() {
 			if (countdownStepIndex < COUNTDOWN_STEPS.length - 1) {
 				countdownStepIndex++;
 				remainingSeconds = 1;
+				if (countdownStepIndex === COUNTDOWN_STEPS.length - 1) {
+					playAlarm('round_end');
+				}
 				scheduleTick(true);
 			} else {
-				playAlarm('round_end');
 				phase = 'exercise';
 				currentRound = 1;
 				remainingSeconds = getConfig().exerciseSeconds;
-				scheduleTick();
+				while (remainingSeconds <= 0) {
+					if (currentRound >= getConfig().rounds) {
+						phase = 'finished';
+						return;
+					}
+					phase = 'rest';
+					remainingSeconds = getConfig().restSeconds;
+					if (remainingSeconds > 0) break;
+					currentRound++;
+					phase = 'exercise';
+					remainingSeconds = getConfig().exerciseSeconds;
+				}
+				if (remainingSeconds > 0) scheduleTick();
 			}
 			return;
 		}
 
 		if (phase === 'exercise') {
-			const signal: BellSignal =
-				currentRound >= getConfig().rounds ? 'workout_complete' : 'round_end';
-			playAlarm(signal);
 			if (currentRound >= getConfig().rounds) {
 				phase = 'finished';
 				return;
 			}
 			phase = 'rest';
 			remainingSeconds = getConfig().restSeconds;
-			scheduleTick();
+			while (remainingSeconds <= 0) {
+				currentRound++;
+				phase = 'exercise';
+				remainingSeconds = getConfig().exerciseSeconds;
+				if (currentRound >= getConfig().rounds) {
+					phase = 'finished';
+					return;
+				}
+				if (remainingSeconds > 0) break;
+				phase = 'rest';
+				remainingSeconds = getConfig().restSeconds;
+			}
+			if (remainingSeconds > 0) scheduleTick();
 			return;
 		}
 
 		if (phase === 'rest') {
-			playAlarm('round_end');
 			currentRound++;
 			phase = 'exercise';
 			remainingSeconds = getConfig().exerciseSeconds;
-			scheduleTick();
+			while (remainingSeconds <= 0) {
+				if (currentRound >= getConfig().rounds) {
+					phase = 'finished';
+					return;
+				}
+				phase = 'rest';
+				remainingSeconds = getConfig().restSeconds;
+				if (remainingSeconds > 0) break;
+				currentRound++;
+				phase = 'exercise';
+				remainingSeconds = getConfig().exerciseSeconds;
+			}
+			if (remainingSeconds > 0) scheduleTick();
 		}
 	}
 

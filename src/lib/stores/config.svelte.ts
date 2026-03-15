@@ -4,16 +4,18 @@ import type { Config } from '$lib/types/timer';
 const STORAGE_KEY = 'box-timer-config';
 
 const DEFAULTS: Config = {
-	exerciseSeconds: 3 * 60,
-	restSeconds: 1 * 60,
+	exerciseSeconds: 0,
+	restSeconds: 0,
 	rounds: 3
 };
 
 const STEP_SECONDS = 15;
 
+const MAX_TIME_SECONDS = 59 * 60 + 45;
+
 const LIMITS = {
-	exerciseSeconds: { min: 30, max: 60 * 60 },
-	restSeconds: { min: 0, max: 10 * 60 },
+	exerciseSeconds: { min: 0, max: MAX_TIME_SECONDS },
+	restSeconds: { min: 0, max: MAX_TIME_SECONDS },
 	rounds: { min: 1, max: 99 }
 } as const;
 
