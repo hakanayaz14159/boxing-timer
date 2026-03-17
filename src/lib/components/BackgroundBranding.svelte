@@ -50,6 +50,7 @@
 		aspect-ratio: 1;
 		display: grid;
 		place-items: center;
+		transform: translateY(clamp(-8.1rem, -10.8vmin, -2.7rem));
 	}
 
 	.arch-svg {
@@ -78,7 +79,7 @@
 
 	.bottom-name {
 		font-family: var(--font-body);
-		font-size: clamp(1.5rem, 4.5vmin, 2.25rem);
+		font-size: clamp(2.25rem, 6.75vmin, 3.375rem);
 		font-weight: 600;
 		letter-spacing: 0.18em;
 		color: var(--color-text-muted);

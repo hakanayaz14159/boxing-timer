@@ -55,8 +55,10 @@
 	.top-info {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		align-items: flex-end;
+		width: 100%;
 		gap: 0.25rem;
+		text-align: right;
 	}
 
 	.phase-label {
