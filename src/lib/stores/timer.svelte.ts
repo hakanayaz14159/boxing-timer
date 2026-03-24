@@ -20,6 +20,9 @@ function createTimerStore() {
 
 	const TICK_MS = 1000;
 	const COUNTDOWN_TICK_MS = 1000;
+	/** After decrement, beep only while display shows these seconds (rest: full final 10s; exercise: early cue then silence until bell). */
+	const REST_WARNING_SECONDS = { min: 1, max: 10 } as const;
+	const EXERCISE_WARNING_SECONDS = { min: 7, max: 10 } as const;
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
 	function clearTimer() {
@@ -47,8 +50,12 @@ function createTimerStore() {
 		}
 
 		remainingSeconds--;
-		if (remainingSeconds >= 1 && remainingSeconds <= 10 && (phase === 'exercise' || phase === 'rest')) {
-			playTenSecondWarning();
+		if (phase === 'exercise' || phase === 'rest') {
+			const w =
+				phase === 'rest' ? REST_WARNING_SECONDS : EXERCISE_WARNING_SECONDS;
+			if (remainingSeconds >= w.min && remainingSeconds <= w.max) {
+				playTenSecondWarning();
+			}
 		}
 		if (remainingSeconds > 0) {
 			scheduleTick(phase === 'countdown');
