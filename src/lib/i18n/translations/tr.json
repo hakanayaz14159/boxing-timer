@@ -1,44 +1,51 @@
 {
 	"app": {
 		"title": "Boks Kronometresi",
-		"viewOnGitHub": "GitHub'da Görüntüle"
+		"viewOnGitHub": "GitHub'da Görüntüle",
+		"theme": "Tema",
+		"themeLight": "Açık tema",
+		"themeDark": "Koyu tema",
+		"themeSystem": "Sistemle aynı",
+		"language": "Dil"
 	},
 	"controls": {
 		"start": "Başla",
 		"resume": "Devam",
 		"pause": "Duraklat",
-		"reset": "Sıfırla"
+		"reset": "Sıfırla",
+		"confirmReset": "Sıfırla?",
+		"confirmResetHint": "Antrenmanı iptal etmek için tekrar dokunun"
 	},
 	"config": {
+		"quickStart": "Hızlı başlangıç",
+		"custom": "Ayarla",
 		"exercise": "Antrenman",
 		"rest": "Dinlenme",
 		"rounds": "Raunt",
-		"edit": "Düzenle",
-		"done": "Tamam",
-		"cancel": "İptal",
-		"decreaseRounds": "Raunt azalt",
-		"increaseRounds": "Raunt artır",
+		"decrease": "{label} azalt",
+		"increase": "{label} artır",
+		"presetDetail": "{exercise} / {rest} × {rounds}",
+		"totalTime": "Toplam {duration}",
 		"previewBell": "Zili dene",
-		"previewBellTitle": "Raunt bitiş zilini dinle",
-		"quickStart": "Hızlı başlangıç",
-		"custom": "Özel",
-		"configSections": "Yapılandırma bölümleri"
-	},
-	"timer": {
-		"paused": "Duraklatıldı",
-		"done": "Bitti",
-		"getReady": "Hazır Ol",
-		"exercise": "Antrenman",
-		"rest": "Dinlenme",
-		"workoutComplete": "Antrenman Tamamlandı",
-		"round": "Raunt {current} / {total}"
+		"previewBellTitle": "Raunt zilini dinle"
 	},
 	"presets": {
-		"amateur": "Amatör (3×3)",
-		"pro-6": "Pro 6 raunt",
-		"pro-8": "Pro 8 raunt",
-		"pro-12": "Pro 12 raunt",
+		"amateur": "Amatör",
+		"pro-6": "Pro 6",
+		"pro-8": "Pro 8",
+		"pro-12": "Pro 12",
 		"womens-pro": "Kadınlar Pro",
-		"fitness": "Fitness (2×5)"
+		"fitness": "Fitness"
+	},
+	"timer": {
+		"getReady": "Hazır Ol",
+		"go": "BAŞLA",
+		"exercise": "Antrenman",
+		"rest": "Dinlenme",
+		"paused": "Duraklatıldı",
+		"done": "Bitti",
+		"workoutComplete": "Antrenman Tamamlandı",
+		"round": "Raunt {current} / {total}",
+		"roundCaption": "Raunt"
 	}
 }

@@ -1,139 +1,164 @@
-import type { TimerPhase, WorkoutConfig } from '$lib/types/timer';
+import type { ActivePhase, TimerPhase, WorkoutConfig } from '$lib/types/timer';
 import { configStore } from './config.svelte';
-import type { BellSignal } from '$lib/services/sound';
-import { playAlarm, playTenSecondWarning, preloadBell } from '$lib/services/sound';
+import { playBell, playWarningBeep, preloadBell } from '$lib/services/sound';
 
-const COUNTDOWN_STEPS: (number | 'Start')[] = [3, 2, 1, 'Start'];
+const COUNTDOWN_STEPS = [3, 2, 1, 'go'] as const;
+type CountdownStep = (typeof COUNTDOWN_STEPS)[number];
+
+const COUNTDOWN_STEP_SECONDS = 1;
+
+/** Seconds remaining during which the warning beep fires, per phase. */
+const WARNING_WINDOWS: Record<Exclude<ActivePhase, 'countdown'>, { min: number; max: number }> = {
+	exercise: { min: 7, max: 10 },
+	rest: { min: 1, max: 10 }
+};
+
+/** Bells for boundaries missed while the tab was hidden are dropped, not replayed. */
+const BELL_GRACE_MS = 1500;
+
+type Segment =
+	| { phase: 'countdown'; step: CountdownStep; seconds: number }
+	| { phase: 'exercise'; round: number; seconds: number }
+	| { phase: 'rest'; round: number; seconds: number };
+
+/**
+ * Expands a config into the full ordered list of segments. Zero-length segments
+ * are filtered out here, which is what makes a rest of 0 behave correctly
+ * instead of consuming a round.
+ */
+function buildTimeline(config: WorkoutConfig): Segment[] {
+	const timeline: Segment[] = COUNTDOWN_STEPS.map((step) => ({
+		phase: 'countdown',
+		step,
+		seconds: COUNTDOWN_STEP_SECONDS
+	}));
+
+	for (let round = 1; round <= config.rounds; round++) {
+		timeline.push({ phase: 'exercise', round, seconds: config.exerciseSeconds });
+		if (round < config.rounds) {
+			timeline.push({ phase: 'rest', round, seconds: config.restSeconds });
+		}
+	}
+
+	return timeline.filter((segment) => segment.seconds > 0);
+}
+
+/** Round starts and round ends ring; the 3-2-1 lead-in does not. */
+function isBellBoundary(segment: Segment): boolean {
+	return segment.phase !== 'countdown' || segment.step === 'go';
+}
 
 function createTimerStore() {
 	let phase = $state<TimerPhase>('config');
 	let currentRound = $state(0);
+	let totalRounds = $state(0);
 	let remainingSeconds = $state(0);
+	let segmentSeconds = $state(0);
 	let isPaused = $state(false);
-	let countdownStepIndex = $state(0);
+	let countdownStep = $state<CountdownStep>(COUNTDOWN_STEPS[0]);
 
-	let activeConfig: WorkoutConfig | null = null;
-
-	function getConfig(): WorkoutConfig {
-		return activeConfig ?? configStore.value;
-	}
-
-	const TICK_MS = 1000;
-	const COUNTDOWN_TICK_MS = 1000;
-	/** After decrement, beep only while display shows these seconds (rest: full final 10s; exercise: early cue then silence until bell). */
-	const REST_WARNING_SECONDS = { min: 1, max: 10 } as const;
-	const EXERCISE_WARNING_SECONDS = { min: 7, max: 10 } as const;
+	let timeline: Segment[] = [];
+	let cursor = 0;
+	let segmentEndsAt = 0;
+	let pausedRemainingMs = 0;
 	let timeoutId: ReturnType<typeof setTimeout> | null = null;
+	let visibilityBound = false;
 
-	function clearTimer() {
+	function clearTimer(): void {
 		if (timeoutId !== null) {
 			clearTimeout(timeoutId);
 			timeoutId = null;
 		}
 	}
 
-	function scheduleTick(isCountdown = false) {
-		const delay = isCountdown ? COUNTDOWN_TICK_MS : TICK_MS;
-		timeoutId = setTimeout(tick, delay);
+	function enterSegment(startedAt: number): void {
+		const segment = timeline[cursor];
+		phase = segment.phase;
+		segmentSeconds = segment.seconds;
+		remainingSeconds = segment.seconds;
+		segmentEndsAt = startedAt + segment.seconds * 1000;
+
+		switch (segment.phase) {
+			case 'countdown':
+				countdownStep = segment.step;
+				break;
+			case 'exercise':
+			case 'rest':
+				currentRound = segment.round;
+				break;
+			default: {
+				const unhandled: never = segment;
+				throw new Error(`Unhandled segment: ${JSON.stringify(unhandled)}`);
+			}
+		}
 	}
 
-	function tick() {
-		if (remainingSeconds <= 0) return;
+	function finish(): void {
+		clearTimer();
+		phase = 'finished';
+		remainingSeconds = 0;
+		segmentSeconds = 0;
+	}
 
-		// Ring 1 second before transition (check before decrement for 1-second phases)
-		if (remainingSeconds === 1 && (phase === 'exercise' || phase === 'rest')) {
-			const signal: BellSignal =
-				phase === 'exercise' && currentRound >= getConfig().rounds
-					? 'workout_complete'
-					: 'round_end';
-			playAlarm(signal);
+	function warnIfInWindow(seconds: number): void {
+		if (phase !== 'exercise' && phase !== 'rest') return;
+		const { min, max } = WARNING_WINDOWS[phase];
+		if (seconds >= min && seconds <= max) {
+			void playWarningBeep();
 		}
+	}
 
-		remainingSeconds--;
-		if (phase === 'exercise' || phase === 'rest') {
-			const w =
-				phase === 'rest' ? REST_WARNING_SECONDS : EXERCISE_WARNING_SECONDS;
-			if (remainingSeconds >= w.min && remainingSeconds <= w.max) {
-				playTenSecondWarning();
-			}
-		}
-		if (remainingSeconds > 0) {
-			scheduleTick(phase === 'countdown');
-			return;
-		}
+	/** Wakes exactly when the displayed second changes, so ticks cannot accumulate drift. */
+	function schedule(): void {
+		const remainingMs = Math.max(0, segmentEndsAt - Date.now());
+		const delay = remainingMs === 0 ? 0 : remainingMs % 1000 || 1000;
+		timeoutId = setTimeout(sync, delay);
+	}
 
+	/**
+	 * Reconciles state against the wall clock. Advances through however many
+	 * segments have elapsed, so a throttled or suspended tab catches up on return
+	 * instead of resuming a stale countdown.
+	 */
+	function sync(): void {
 		clearTimer();
 
-		if (phase === 'countdown') {
-			if (countdownStepIndex < COUNTDOWN_STEPS.length - 1) {
-				countdownStepIndex++;
-				remainingSeconds = 1;
-				if (countdownStepIndex === COUNTDOWN_STEPS.length - 1) {
-					playAlarm('round_end');
-				}
-				scheduleTick(true);
-			} else {
-				phase = 'exercise';
-				currentRound = 1;
-				remainingSeconds = getConfig().exerciseSeconds;
-				while (remainingSeconds <= 0) {
-					if (currentRound >= getConfig().rounds) {
-						phase = 'finished';
-						return;
-					}
-					phase = 'rest';
-					remainingSeconds = getConfig().restSeconds;
-					if (remainingSeconds > 0) break;
-					currentRound++;
-					phase = 'exercise';
-					remainingSeconds = getConfig().exerciseSeconds;
-				}
-				if (remainingSeconds > 0) scheduleTick();
-			}
-			return;
-		}
+		while (Date.now() >= segmentEndsAt) {
+			const ended = timeline[cursor];
+			const endedAt = segmentEndsAt;
+			const isFinalSegment = cursor === timeline.length - 1;
 
-		if (phase === 'exercise') {
-			if (currentRound >= getConfig().rounds) {
-				phase = 'finished';
+			if (isBellBoundary(ended) && Date.now() - endedAt <= BELL_GRACE_MS) {
+				void playBell(isFinalSegment ? 'workout_complete' : 'round');
+			}
+
+			if (isFinalSegment) {
+				finish();
 				return;
 			}
-			phase = 'rest';
-			remainingSeconds = getConfig().restSeconds;
-			while (remainingSeconds <= 0) {
-				currentRound++;
-				phase = 'exercise';
-				remainingSeconds = getConfig().exerciseSeconds;
-				if (currentRound >= getConfig().rounds) {
-					phase = 'finished';
-					return;
-				}
-				if (remainingSeconds > 0) break;
-				phase = 'rest';
-				remainingSeconds = getConfig().restSeconds;
-			}
-			if (remainingSeconds > 0) scheduleTick();
-			return;
+
+			cursor++;
+			enterSegment(endedAt);
 		}
 
-		if (phase === 'rest') {
-			currentRound++;
-			phase = 'exercise';
-			remainingSeconds = getConfig().exerciseSeconds;
-			while (remainingSeconds <= 0) {
-				if (currentRound >= getConfig().rounds) {
-					phase = 'finished';
-					return;
-				}
-				phase = 'rest';
-				remainingSeconds = getConfig().restSeconds;
-				if (remainingSeconds > 0) break;
-				currentRound++;
-				phase = 'exercise';
-				remainingSeconds = getConfig().exerciseSeconds;
-			}
-			if (remainingSeconds > 0) scheduleTick();
+		const seconds = Math.ceil((segmentEndsAt - Date.now()) / 1000);
+		if (seconds !== remainingSeconds) {
+			remainingSeconds = seconds;
+			warnIfInWindow(seconds);
 		}
+
+		schedule();
+	}
+
+	function bindVisibility(): void {
+		if (visibilityBound || typeof document === 'undefined') return;
+		visibilityBound = true;
+		document.addEventListener('visibilitychange', () => {
+			if (document.hidden || isPaused) return;
+			if (phase === 'countdown' || phase === 'exercise' || phase === 'rest') {
+				sync();
+			}
+		});
 	}
 
 	return {
@@ -143,43 +168,52 @@ function createTimerStore() {
 		get currentRound() {
 			return currentRound;
 		},
+		get totalRounds() {
+			return totalRounds;
+		},
 		get remainingSeconds() {
 			return remainingSeconds;
 		},
 		get isPaused() {
 			return isPaused;
 		},
-		get countdownStepIndex() {
-			return countdownStepIndex;
+		get countdownStep() {
+			return countdownStep;
 		},
-		get countdownDisplay(): number | 'Start' {
-			return COUNTDOWN_STEPS[countdownStepIndex];
+		/** Fraction of the current segment already elapsed, 0 to 1. */
+		get segmentProgress() {
+			if (segmentSeconds <= 0) return 0;
+			return (segmentSeconds - remainingSeconds) / segmentSeconds;
 		},
-		get activeConfig(): WorkoutConfig {
-			return getConfig();
-		},
-		start(config?: WorkoutConfig) {
-			preloadBell();
+		start() {
+			const workout = configStore.value;
+			// Called from a click, which is the only moment mobile browsers let us
+			// unlock the AudioContext.
+			void preloadBell();
+			bindVisibility();
 			clearTimer();
-			activeConfig = config ?? null;
-			phase = 'countdown';
+
+			timeline = buildTimeline(workout);
+			totalRounds = workout.rounds;
+			cursor = 0;
 			currentRound = 0;
-			countdownStepIndex = 0;
-			remainingSeconds = 1;
 			isPaused = false;
-			scheduleTick(true);
+			enterSegment(Date.now());
+			sync();
 		},
 		pause() {
 			if (phase !== 'exercise' && phase !== 'rest') return;
+			if (isPaused) return;
 			isPaused = true;
+			pausedRemainingMs = Math.max(0, segmentEndsAt - Date.now());
 			clearTimer();
 		},
 		resume() {
 			if (phase !== 'exercise' && phase !== 'rest') return;
 			if (!isPaused) return;
 			isPaused = false;
-			clearTimer();
-			scheduleTick();
+			segmentEndsAt = Date.now() + pausedRemainingMs;
+			sync();
 		},
 		togglePause() {
 			if (isPaused) {
@@ -190,12 +224,17 @@ function createTimerStore() {
 		},
 		reset() {
 			clearTimer();
-			activeConfig = null;
+			timeline = [];
+			cursor = 0;
+			segmentEndsAt = 0;
+			pausedRemainingMs = 0;
 			phase = 'config';
 			currentRound = 0;
+			totalRounds = 0;
 			remainingSeconds = 0;
+			segmentSeconds = 0;
 			isPaused = false;
-			countdownStepIndex = 0;
+			countdownStep = COUNTDOWN_STEPS[0];
 		}
 	};
 }

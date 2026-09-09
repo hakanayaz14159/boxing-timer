@@ -1,44 +1,51 @@
 {
 	"app": {
 		"title": "Boxing Timer",
-		"viewOnGitHub": "View on GitHub"
+		"viewOnGitHub": "View on GitHub",
+		"theme": "Theme",
+		"themeLight": "Light theme",
+		"themeDark": "Dark theme",
+		"themeSystem": "Match system theme",
+		"language": "Language"
 	},
 	"controls": {
 		"start": "Start",
 		"resume": "Resume",
 		"pause": "Pause",
-		"reset": "Reset"
+		"reset": "Reset",
+		"confirmReset": "Reset?",
+		"confirmResetHint": "Tap again to discard this workout"
 	},
 	"config": {
+		"quickStart": "Quick start",
+		"custom": "Adjust",
 		"exercise": "Exercise",
 		"rest": "Rest",
 		"rounds": "Rounds",
-		"edit": "Edit",
-		"done": "Done",
-		"cancel": "Cancel",
-		"decreaseRounds": "Decrease rounds",
-		"increaseRounds": "Increase rounds",
+		"decrease": "Decrease {label}",
+		"increase": "Increase {label}",
+		"presetDetail": "{exercise} / {rest} × {rounds}",
+		"totalTime": "Total {duration}",
 		"previewBell": "Preview bell",
-		"previewBellTitle": "Preview round-end bell",
-		"quickStart": "Quick start",
-		"custom": "Custom",
-		"configSections": "Configuration sections"
-	},
-	"timer": {
-		"paused": "Paused",
-		"done": "Done",
-		"getReady": "Get Ready",
-		"exercise": "Exercise",
-		"rest": "Rest",
-		"workoutComplete": "Workout Complete",
-		"round": "Round {current} / {total}"
+		"previewBellTitle": "Preview the round bell"
 	},
 	"presets": {
-		"amateur": "Amateur (3×3)",
-		"pro-6": "Pro 6 rounds",
-		"pro-8": "Pro 8 rounds",
-		"pro-12": "Pro 12 rounds",
+		"amateur": "Amateur",
+		"pro-6": "Pro 6",
+		"pro-8": "Pro 8",
+		"pro-12": "Pro 12",
 		"womens-pro": "Women's Pro",
-		"fitness": "Fitness (2×5)"
+		"fitness": "Fitness"
+	},
+	"timer": {
+		"getReady": "Get Ready",
+		"go": "GO",
+		"exercise": "Exercise",
+		"rest": "Rest",
+		"paused": "Paused",
+		"done": "Done",
+		"workoutComplete": "Workout Complete",
+		"round": "Round {current} of {total}",
+		"roundCaption": "Round"
 	}
 }

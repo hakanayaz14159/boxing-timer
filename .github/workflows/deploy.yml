@@ -18,6 +18,16 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Typecheck
+        run: bun run check
+
+      # Separate steps so a formatting failure still reports the ESLint result.
+      - name: Check formatting
+        run: bun run lint:format
+
+      - name: Lint
+        run: bun run lint:js
+
       - name: Build
         env:
           BASE_PATH: '/${{ github.event.repository.name }}'

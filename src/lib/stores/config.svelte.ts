@@ -1,11 +1,11 @@
 import { browser } from '$app/environment';
-import type { Config } from '$lib/types/timer';
+import type { WorkoutConfig } from '$lib/types/timer';
 
 const STORAGE_KEY = 'box-timer-config';
 
-const DEFAULTS: Config = {
-	exerciseSeconds: 0,
-	restSeconds: 0,
+const DEFAULTS: WorkoutConfig = {
+	exerciseSeconds: 3 * 60,
+	restSeconds: 1 * 60,
 	rounds: 3
 };
 
@@ -14,7 +14,7 @@ const STEP_SECONDS = 15;
 const MAX_TIME_SECONDS = 59 * 60 + 45;
 
 const LIMITS = {
-	exerciseSeconds: { min: 0, max: MAX_TIME_SECONDS },
+	exerciseSeconds: { min: STEP_SECONDS, max: MAX_TIME_SECONDS },
 	restSeconds: { min: 0, max: MAX_TIME_SECONDS },
 	rounds: { min: 1, max: 99 }
 } as const;
@@ -30,23 +30,35 @@ function safeNumber(value: unknown, fallback: number): number {
 	return Number.isFinite(n) ? n : fallback;
 }
 
-function normalizeConfig(raw: Partial<Config>): Config {
+function snap(seconds: number): number {
+	return Math.round(seconds / STEP_SECONDS) * STEP_SECONDS;
+}
+
+function normalizeConfig(raw: Partial<WorkoutConfig>): WorkoutConfig {
+	// A zero exercise time yields a workout with no rounds, so treat it as absent.
+	// This also migrates configs saved by earlier versions, whose default was 0.
+	const exercise = safeNumber(raw.exerciseSeconds, DEFAULTS.exerciseSeconds);
+
 	return {
 		exerciseSeconds: clamp(
-			safeNumber(raw.exerciseSeconds, DEFAULTS.exerciseSeconds),
+			snap(exercise > 0 ? exercise : DEFAULTS.exerciseSeconds),
 			LIMITS.exerciseSeconds.min,
 			LIMITS.exerciseSeconds.max
 		),
 		restSeconds: clamp(
-			safeNumber(raw.restSeconds, DEFAULTS.restSeconds),
+			snap(safeNumber(raw.restSeconds, DEFAULTS.restSeconds)),
 			LIMITS.restSeconds.min,
 			LIMITS.restSeconds.max
 		),
-		rounds: clamp(safeNumber(raw.rounds, DEFAULTS.rounds), LIMITS.rounds.min, LIMITS.rounds.max)
+		rounds: clamp(
+			Math.round(safeNumber(raw.rounds, DEFAULTS.rounds)),
+			LIMITS.rounds.min,
+			LIMITS.rounds.max
+		)
 	};
 }
 
-function loadFromStorage(): Config {
+function loadFromStorage(): WorkoutConfig {
 	if (!browser) return { ...DEFAULTS };
 	try {
 		const raw = localStorage.getItem(STORAGE_KEY);
@@ -55,18 +67,18 @@ function loadFromStorage(): Config {
 		if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
 			return { ...DEFAULTS };
 		}
-		return normalizeConfig(parsed as Partial<Config>);
+		return normalizeConfig(parsed as Partial<WorkoutConfig>);
 	} catch {
 		return { ...DEFAULTS };
 	}
 }
 
-function saveToStorage(config: Config): void {
+function saveToStorage(config: WorkoutConfig): void {
 	if (!browser) return;
 	try {
 		localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
 	} catch {
-		/* noop */
+		/* Private-mode or quota failures must not break the timer. */
 	}
 }
 
@@ -77,11 +89,11 @@ function createConfigStore() {
 		get value() {
 			return config;
 		},
-		set(value: Config) {
+		set(value: WorkoutConfig) {
 			config = normalizeConfig(value);
 			saveToStorage(config);
 		},
-		update(partial: Partial<Config>) {
+		update(partial: Partial<WorkoutConfig>) {
 			this.set({ ...config, ...partial });
 		}
 	};

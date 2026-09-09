@@ -12,7 +12,9 @@ export default defineConfig({
 			},
 			workbox: {
 				globPatterns: [
-					'client/**/*.{js,css,ico,png,svg,webp,webmanifest,mp3}',
+					// woff2 and mp3 are required offline: without them the countdown
+					// falls back to a different font and the bell goes silent.
+					'client/**/*.{js,css,ico,png,svg,webp,webmanifest,mp3,woff2}',
 					'prerendered/**/*.{html,json}'
 				]
 			},

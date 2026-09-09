@@ -1,11 +1,28 @@
 <script lang="ts">
 	import logo from '$lib/assets/no-bg-logo.png';
+
+	interface Props {
+		/** Recede behind the countdown while a round is running. */
+		dimmed: boolean;
+	}
+
+	let { dimmed }: Props = $props();
 </script>
 
-<div class="background-branding" aria-hidden="true">
-	<div class="branding-center">
-		<div class="branding-unit">
-			<svg class="arch-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+<!--
+	`display: contents` so the page grid places these two pieces directly: the
+	watermark shares the stage cell with the countdown, the wordmark gets a row of
+	its own. Neither is absolutely positioned, so neither can land on a control.
+-->
+<div class="branding" aria-hidden="true">
+	<div class="watermark" class:watermark--dimmed={dimmed}>
+		<div class="unit">
+			<svg
+				class="arch"
+				viewBox="0 0 100 100"
+				preserveAspectRatio="xMidYMid meet"
+				aria-hidden="true"
+			>
 				<defs>
 					<path id="arch-path" d="M 6,50 A 44,44 0 0 1 94,50" />
 				</defs>
@@ -18,54 +35,52 @@
 			<img src={logo} alt="" class="logo" />
 		</div>
 	</div>
-	<div class="bottom-name">AHMET TAŞÇI</div>
+
+	<div class="wordmark">AHMET TAŞÇI</div>
 </div>
 
 <style>
-	.background-branding {
-		position: absolute;
-		inset: 0;
-		pointer-events: none;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: space-between;
-		padding: calc(3rem + env(safe-area-inset-top, 0)) 1.25rem
-			calc(1.75rem + env(safe-area-inset-bottom, 0));
-		z-index: 0;
+	.branding {
+		display: contents;
 	}
 
-	.branding-center {
-		flex: 1;
+	/* Spans every row so the mark is centred on the page rather than on one
+	   region, and sits behind all content. */
+	.watermark {
+		grid-row: 1 / -1;
+		grid-column: 1 / -1;
 		display: grid;
 		place-items: center;
+		min-width: 0;
 		min-height: 0;
-		width: 100%;
+		opacity: 0.4;
+		pointer-events: none;
+		transition: opacity var(--motion-slow) var(--ease);
 	}
 
-	.branding-unit {
-		--branding-size: clamp(18rem, 56vmin, 38rem);
+	/*
+	 * Still clearly present mid-round, but stepped back from the config level so
+	 * the digits, read from several metres away, stay the dominant element.
+	 */
+	.watermark--dimmed {
+		opacity: 0.22;
+	}
+
+	.unit {
 		position: relative;
-		width: var(--branding-size);
-		aspect-ratio: 1;
 		display: grid;
 		place-items: center;
-		transform: translateY(clamp(-8.1rem, -10.8vmin, -2.7rem));
+		width: min(92vmin, 60rem);
+		aspect-ratio: 1;
+		max-height: 100%;
 	}
 
-	.arch-svg {
+	.arch {
 		position: absolute;
 		inset: 0;
 		width: 100%;
 		height: 100%;
 		overflow: visible;
-	}
-
-	.logo {
-		width: 72%;
-		height: auto;
-		opacity: 0.5;
-		object-fit: contain;
 	}
 
 	.arch-text {
@@ -74,26 +89,28 @@
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		fill: var(--color-text-muted);
-		opacity: 0.6;
 	}
 
-	.bottom-name {
-		font-family: var(--font-body);
-		font-size: clamp(2.25rem, 6.75vmin, 3.375rem);
+	.logo {
+		width: 72%;
+		height: auto;
+		object-fit: contain;
+	}
+
+	.wordmark {
+		grid-area: brand;
+		padding-bottom: env(safe-area-inset-bottom, 0);
+		font-size: clamp(1rem, 4vmin, 1.75rem);
 		font-weight: 600;
 		letter-spacing: 0.18em;
-		color: var(--color-text-muted);
-		opacity: 0.6;
 		text-align: center;
+		color: var(--color-text-muted);
 	}
 
-	@media (max-width: 640px) {
-		.branding-unit {
-			--branding-size: clamp(17rem, 72vw, 28rem);
-		}
-
-		.logo {
-			width: 74%;
+	@media (max-height: 500px) {
+		.wordmark {
+			font-size: var(--text-sm);
+			letter-spacing: 0.12em;
 		}
 
 		.arch-text {

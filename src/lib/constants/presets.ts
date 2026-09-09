@@ -1,15 +1,13 @@
-import type { WorkoutConfig } from '$lib/types/timer';
+import type { PresetId, WorkoutConfig } from '$lib/types/timer';
 
 export interface Preset {
-	id: string;
-	label: string;
+	id: PresetId;
 	config: WorkoutConfig;
 }
 
-export const BOXING_PRESETS: Preset[] = [
+export const BOXING_PRESETS: readonly Preset[] = [
 	{
 		id: 'amateur',
-		label: 'Amateur (3×3)',
 		config: {
 			exerciseSeconds: 3 * 60,
 			restSeconds: 1 * 60,
@@ -18,7 +16,6 @@ export const BOXING_PRESETS: Preset[] = [
 	},
 	{
 		id: 'pro-6',
-		label: 'Pro 6 rounds',
 		config: {
 			exerciseSeconds: 3 * 60,
 			restSeconds: 1 * 60,
@@ -27,7 +24,6 @@ export const BOXING_PRESETS: Preset[] = [
 	},
 	{
 		id: 'pro-8',
-		label: 'Pro 8 rounds',
 		config: {
 			exerciseSeconds: 3 * 60,
 			restSeconds: 1 * 60,
@@ -36,7 +32,6 @@ export const BOXING_PRESETS: Preset[] = [
 	},
 	{
 		id: 'pro-12',
-		label: 'Pro 12 rounds',
 		config: {
 			exerciseSeconds: 3 * 60,
 			restSeconds: 1 * 60,
@@ -45,7 +40,6 @@ export const BOXING_PRESETS: Preset[] = [
 	},
 	{
 		id: 'womens-pro',
-		label: "Women's Pro",
 		config: {
 			exerciseSeconds: 2 * 60,
 			restSeconds: 1 * 60,
@@ -54,7 +48,6 @@ export const BOXING_PRESETS: Preset[] = [
 	},
 	{
 		id: 'fitness',
-		label: 'Fitness (2×5)',
 		config: {
 			exerciseSeconds: 2 * 60,
 			restSeconds: 30,

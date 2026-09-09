@@ -1,45 +1,32 @@
 import { browser } from '$app/environment';
-import { writable, derived, get } from 'svelte/store';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
+type EffectiveTheme = 'light' | 'dark';
 
 const STORAGE_KEY = 'box-timer-theme';
 
-const LIGHT_COLORS = {
-	bg: '#f8fafc',
-	bgInput: '#ffffff',
-	bgHover: '#f1f5f9',
-	text: '#0f172a',
-	textMuted: '#64748b',
-	primary: '#dc2626',
-	secondary: '#475569',
-	border: '#e2e8f0',
-	bgExercise: '#fef2f2',
-	bgRest: '#f0f9ff'
-} as const;
+/**
+ * The only colours that must exist in JS: the browser/PWA chrome colour cannot
+ * read a CSS custom property. Everything else lives in app.css.
+ */
+const CHROME_COLORS: Record<EffectiveTheme, string> = {
+	light: '#f8fafc',
+	dark: '#0f172a'
+};
 
-const DARK_COLORS = {
-	bg: '#0f172a',
-	bgInput: '#1e293b',
-	bgHover: '#334155',
-	text: '#f8fafc',
-	textMuted: '#94a3b8',
-	primary: '#ef4444',
-	secondary: '#64748b',
-	border: '#334155',
-	bgExercise: '#451a1a',
-	bgRest: '#0c4a6e'
-} as const;
+export { CHROME_COLORS };
+
+function isPreference(value: unknown): value is ThemePreference {
+	return value === 'light' || value === 'dark' || value === 'system';
+}
 
 function loadFromStorage(): ThemePreference {
 	if (!browser) return 'system';
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
-		if (stored === 'light' || stored === 'dark' || stored === 'system') {
-			return stored;
-		}
+		if (isPreference(stored)) return stored;
 	} catch {
-		/* noop */
+		/* Private-mode failures fall through to the default. */
 	}
 	return 'system';
 }
@@ -49,53 +36,33 @@ function saveToStorage(preference: ThemePreference): void {
 	try {
 		localStorage.setItem(STORAGE_KEY, preference);
 	} catch {
-		/* noop */
+		/* Persisting a preference is best-effort. */
 	}
 }
 
-function getSystemPrefersDark(): boolean {
-	if (!browser) return false;
-	return window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-
-const preference = writable<ThemePreference>(loadFromStorage());
-const systemDark = writable(getSystemPrefersDark());
+let preference = $state<ThemePreference>(loadFromStorage());
+let systemDark = $state(browser && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
 if (browser) {
-	preference.subscribe((value) => {
-		saveToStorage(value);
-	});
-
-	const mq = window.matchMedia('(prefers-color-scheme: dark)');
-	mq.addEventListener('change', () => {
-		systemDark.set(mq.matches);
+	window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+		systemDark = event.matches;
 	});
 }
 
-export const effectiveTheme = derived(
-	[preference, systemDark],
-	([$preference, $systemDark]): 'light' | 'dark' => {
-		if ($preference === 'system') return $systemDark ? 'dark' : 'light';
-		return $preference;
-	}
-);
-
-export const themeColor = derived(effectiveTheme, ($effective) =>
-	$effective === 'light' ? LIGHT_COLORS.bg : DARK_COLORS.bg
-);
+function effectiveOf(value: ThemePreference, dark: boolean): EffectiveTheme {
+	if (value === 'system') return dark ? 'dark' : 'light';
+	return value;
+}
 
 export const themeStore = {
-	get preference() {
-		return get(preference);
+	get preference(): ThemePreference {
+		return preference;
 	},
 	set preference(value: ThemePreference) {
-		preference.set(value);
+		preference = value;
+		saveToStorage(value);
 	},
-	get effectiveTheme() {
-		return get(effectiveTheme);
-	},
-	get themeColor() {
-		return get(themeColor);
-	},
-	subscribe: preference.subscribe
+	get chromeColor(): string {
+		return CHROME_COLORS[effectiveOf(preference, systemDark)];
+	}
 };

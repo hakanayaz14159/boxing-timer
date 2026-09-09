@@ -1,33 +1,70 @@
 <script lang="ts">
 	import { timerStore } from '$lib/stores/timer.svelte';
-	import { localeStore, locale } from '$lib/i18n';
+	import { t } from '$lib/i18n/locale.svelte';
 
-	const t = localeStore.t.bind(localeStore);
-	$locale;
-	const phase = $derived(timerStore.phase);
-	const isPaused = $derived(timerStore.isPaused);
+	const CONFIRM_WINDOW_MS = 3000;
 
-	const canStart = $derived(phase === 'config');
-	const canPauseResume = $derived(phase === 'exercise' || phase === 'rest');
-	const canReset = $derived(
-		phase === 'countdown' || phase === 'exercise' || phase === 'rest' || phase === 'finished'
-	);
+	let phase = $derived(timerStore.phase);
+	let isRunning = $derived(phase === 'countdown' || phase === 'exercise' || phase === 'rest');
+	let canPause = $derived(phase === 'exercise' || phase === 'rest');
+
+	let confirming = $state(false);
+	let confirmTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function cancelConfirm() {
+		if (confirmTimeout !== null) {
+			clearTimeout(confirmTimeout);
+			confirmTimeout = null;
+		}
+		confirming = false;
+	}
+
+	function handleReset() {
+		if (!isRunning || confirming) {
+			cancelConfirm();
+			timerStore.reset();
+			return;
+		}
+		confirming = true;
+		confirmTimeout = setTimeout(cancelConfirm, CONFIRM_WINDOW_MS);
+	}
+
+	$effect(() => {
+		if (!isRunning) cancelConfirm();
+		return cancelConfirm;
+	});
 </script>
 
 <div class="controls">
-	{#if canStart}
-		<button type="button" class="btn btn-primary" onclick={() => timerStore.start()}>
+	{#if phase === 'config' || phase === 'finished'}
+		<button
+			type="button"
+			class="btn btn--accent btn--workout start"
+			onclick={() => timerStore.start()}
+		>
 			{t('controls.start')}
 		</button>
 	{/if}
-	{#if canPauseResume}
-		<button type="button" class="btn btn-secondary" onclick={() => timerStore.togglePause()}>
-			{isPaused ? t('controls.resume') : t('controls.pause')}
+
+	{#if canPause}
+		<button
+			type="button"
+			class="btn btn--inverse btn--workout control"
+			onclick={() => timerStore.togglePause()}
+		>
+			{timerStore.isPaused ? t('controls.resume') : t('controls.pause')}
 		</button>
 	{/if}
-	{#if canReset}
-		<button type="button" class="btn btn-outline" onclick={() => timerStore.reset()}>
-			{t('controls.reset')}
+
+	{#if isRunning || phase === 'finished'}
+		<button
+			type="button"
+			class="btn btn--workout control reset"
+			class:reset--confirming={confirming}
+			onclick={handleReset}
+			title={confirming ? t('controls.confirmResetHint') : undefined}
+		>
+			{confirming ? t('controls.confirmReset') : t('controls.reset')}
 		</button>
 	{/if}
 </div>
@@ -36,102 +73,38 @@
 	.controls {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.75rem;
+		align-items: center;
 		justify-content: center;
-		align-items: stretch;
-		width: 100%;
+		gap: var(--sp-4);
+		width: min(100%, 42rem);
+		margin-inline: auto;
 	}
 
-	.btn {
-		flex: 1;
-		min-width: 0;
-		min-height: 56px;
-		padding: 0.875rem 1.5rem;
-		font-size: 1.125rem;
-		font-weight: 600;
-		border-radius: var(--radius-md);
-		cursor: pointer;
-		border: none;
-		transition:
-			opacity 0.15s,
-			transform 0.1s,
-			background 0.15s;
+	.start {
+		--control-h: 64px;
+		flex: 1 1 100%;
+		font-size: var(--text-xl);
 	}
 
-	.btn:active {
-		transform: scale(0.98);
+	.control {
+		flex: 1 1 10rem;
 	}
 
-	.btn:focus-visible {
-		outline: 2px solid var(--color-primary);
-		outline-offset: 2px;
-	}
-
-	@media (max-width: 640px) and (orientation: portrait) {
-		.controls {
-			gap: 1rem;
-		}
-
-		.btn {
-			min-height: 64px;
-			min-width: 100px;
-			flex: 1 1 0;
-			font-size: 1.25rem;
-			padding: 1rem 1.5rem;
-		}
-	}
-
-	@media (orientation: landscape) and (max-height: 500px) {
-		.controls {
-			flex-direction: row;
-			gap: 0.75rem;
-		}
-
-		.btn {
-			min-height: 56px;
-			flex: 1;
-			font-size: 1.125rem;
-			padding: 0.75rem 1.25rem;
-		}
-	}
-
-	@media (min-width: 641px) {
-		.controls {
-			width: auto;
-		}
-
-		.btn {
-			flex: none;
-			min-width: 56px;
-		}
-	}
-
-	.btn-primary {
-		background: var(--color-primary);
-		color: white;
-	}
-
-	.btn-primary:hover {
-		opacity: 0.95;
-	}
-
-	.btn-secondary {
-		background: var(--color-secondary);
-		color: white;
-	}
-
-	.btn-secondary:hover {
-		opacity: 0.95;
-	}
-
-	.btn-outline {
-		background: var(--color-bg-input);
+	/*
+	 * Outlined in the text colour: secondary to the filled Pause, yet visible on
+	 * every phase background, where the default grey border washes out. The
+	 * confirming state is unmistakable rather than a silent one-tap discard.
+	 */
+	.reset {
+		flex: 0 1 9rem;
 		color: var(--color-text);
-		border: 2px solid var(--color-border);
+		background: transparent;
+		border-color: currentColor;
 	}
 
-	.btn-outline:hover {
-		background: var(--color-bg-hover);
-		border-color: var(--color-text-muted);
+	.reset--confirming {
+		color: var(--color-on-accent);
+		background: var(--color-accent);
+		border-color: var(--color-accent);
 	}
 </style>
