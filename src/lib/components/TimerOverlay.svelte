@@ -19,16 +19,20 @@
 
 <div class="overlay">
 	<div class="top-info">
-		{#if phaseLabel}
-			<span class="phase-label">{phaseLabel}</span>
-		{/if}
 		{#if showRound}
-			<span class="round">
-				{t('timer.round', {
+			<span
+				class="round"
+				aria-live="polite"
+				aria-label={t('timer.round', {
 					current: timerStore.currentRound,
 					total: timerStore.activeConfig.rounds
 				})}
+			>
+				{timerStore.currentRound} / {timerStore.activeConfig.rounds}
 			</span>
+		{/if}
+		{#if phaseLabel}
+			<span class="phase-label">{phaseLabel}</span>
 		{/if}
 	</div>
 	<div class="controls-wrapper">
@@ -41,11 +45,6 @@
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: space-between;
-		padding: calc(5rem + env(safe-area-inset-top, 0)) 1.5rem calc(2rem + env(safe-area-inset-bottom, 0));
 	}
 
 	.overlay > * {
@@ -53,12 +52,14 @@
 	}
 
 	.top-info {
+		position: absolute;
+		top: max(1rem, env(safe-area-inset-top, 0px));
+		left: max(1.25rem, env(safe-area-inset-left, 0px));
 		display: flex;
 		flex-direction: column;
-		align-items: flex-end;
-		width: 100%;
-		gap: 0.25rem;
-		text-align: right;
+		align-items: flex-start;
+		gap: 0.15rem;
+		text-align: left;
 	}
 
 	.phase-label {
@@ -69,16 +70,20 @@
 	}
 
 	.round {
-		font-size: clamp(1.25rem, 4vw, 2rem);
+		font-size: clamp(3.25rem, 12vmin, 7.5rem);
 		font-weight: 700;
+		line-height: 0.9;
+		letter-spacing: -0.04em;
 		font-family: var(--font-display, system-ui, sans-serif);
 		color: var(--color-text);
 	}
 
 	.controls-wrapper {
+		position: absolute;
+		right: max(0.75rem, env(safe-area-inset-right, 0px));
+		bottom: max(1rem, env(safe-area-inset-bottom, 0px));
 		display: flex;
 		justify-content: flex-end;
-		width: 100%;
 	}
 
 	.controls-wrapper :global(.controls) {
@@ -95,11 +100,6 @@
 	}
 
 	@media (max-width: 640px) and (orientation: portrait) {
-		.overlay {
-			padding: calc(5rem + env(safe-area-inset-top, 0)) 0.75rem
-				calc(1.5rem + env(safe-area-inset-bottom, 0));
-		}
-
 		.controls-wrapper :global(.controls) {
 			max-width: none;
 			flex-direction: row;
@@ -115,11 +115,6 @@
 	}
 
 	@media (orientation: landscape) and (max-height: 500px) {
-		.overlay {
-			padding: calc(3rem + env(safe-area-inset-top, 0)) 1rem
-				calc(0.75rem + env(safe-area-inset-bottom, 0));
-		}
-
 		.controls-wrapper :global(.controls) {
 			max-width: none;
 			flex-direction: row;

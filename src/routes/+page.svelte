@@ -15,7 +15,9 @@
 </script>
 
 <div class="page-wrapper">
-	<AppHeader />
+	{#if showConfig}
+		<AppHeader />
+	{/if}
 	<main
 		class="page"
 		class:phase-exercise={phase === 'exercise'}

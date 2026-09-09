@@ -57,7 +57,7 @@
 	}
 
 	.display {
-		font-size: min(32cqw, 42cqh);
+		font-size: min(32cqw, 58cqh);
 		font-weight: 700;
 		line-height: 1;
 		color: var(--color-text, #111);
@@ -65,20 +65,20 @@
 	}
 
 	.display.display--long {
-		font-size: min(18cqw, 25cqh);
+		font-size: min(18cqw, 28cqh);
 	}
 
 	@media (orientation: landscape) and (max-height: 500px) {
 		.countdown {
-			padding: 0.25rem;
+			padding: 7rem 0.75rem 4.5rem;
 		}
 
 		.display {
-			font-size: min(36cqw, 50cqh);
+			font-size: min(32cqw, 64cqh);
 		}
 
 		.display.display--long {
-			font-size: min(16cqw, 22cqh);
+			font-size: min(16cqw, 24cqh);
 		}
 
 		.paused-badge {
