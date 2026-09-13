@@ -94,6 +94,31 @@
 		}
 	}
 
+	/* Spare desktop height: leave the watermark readable above a slightly smaller clock. */
+	@media (min-width: 1024px) and (min-height: 501px) {
+		.clock {
+			grid-template-areas:
+				'.'
+				'readout'
+				'progress';
+			grid-template-rows: minmax(0, 2fr) auto minmax(0, 1fr);
+		}
+
+		.readout {
+			grid-area: readout;
+			font-size: min(25cqw, 50cqh);
+		}
+
+		.word {
+			font-size: min(calc(110cqw / var(--chars, 1)), 48cqh);
+		}
+
+		.progress {
+			grid-area: progress;
+			align-self: end;
+		}
+	}
+
 	.clock--paused .readout {
 		opacity: 0.5;
 	}
