@@ -30,12 +30,12 @@
 		"previewBellTitle": "Preview the round bell"
 	},
 	"presets": {
-		"amateur": "Amateur",
-		"pro-6": "Pro 6",
-		"pro-8": "Pro 8",
-		"pro-12": "Pro 12",
-		"womens-pro": "Women's Pro",
-		"fitness": "Fitness"
+		"seniors": "Seniors, U23, Youth",
+		"juniors": "Juniors",
+		"upper-mini": "Upper Mini",
+		"lower-mini": "Lower Mini",
+		"group-class": "Group Class",
+		"private-lesson": "Private Lesson"
 	},
 	"timer": {
 		"getReady": "Get Ready",

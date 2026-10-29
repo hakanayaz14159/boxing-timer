@@ -16,8 +16,6 @@
 </script>
 
 <header class="top-bar">
-	<span class="title">{t('app.title')}</span>
-
 	<div class="actions">
 		<div class="segmented" role="group" aria-label={t('app.theme')}>
 			{#each THEME_OPTIONS as option (option.value)}
@@ -105,10 +103,10 @@
 <style>
 	.top-bar {
 		grid-area: header;
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
+		display: flex;
+		justify-content: flex-end;
 		align-items: center;
-		gap: var(--sp-3);
+		min-width: 0;
 		padding-top: env(safe-area-inset-top, 0);
 	}
 
@@ -117,26 +115,6 @@
 		.top-bar {
 			display: none;
 		}
-	}
-
-	/* Narrow phones cannot fit the title and the controls, and an ellipsised stub
-	   is worse than none: the document title and the wordmark still name the app. */
-	@media (max-width: 480px) {
-		.title {
-			display: none;
-		}
-	}
-
-	/* min-width: 0 above plus ellipsis here: a long title shrinks instead of
-	   pushing the controls off the edge. */
-	.title {
-		min-width: 0;
-		font-size: clamp(var(--text-md), 4vw, var(--text-xl));
-		font-weight: 700;
-		letter-spacing: -0.02em;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
 	}
 
 	.actions {

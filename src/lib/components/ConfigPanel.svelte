@@ -106,8 +106,8 @@
 </div>
 
 <style>
-	/* An opaque card: the branding watermark passes behind the page, and form
-	   labels must stay legible regardless of what is underneath them. */
+	/* Opaque card: the corner watermark passes behind it, and the form must stay
+	   legible regardless of what is underneath. */
 	.config {
 		display: grid;
 		gap: var(--sp-6);

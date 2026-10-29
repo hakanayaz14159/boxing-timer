@@ -9,4 +9,10 @@ export interface WorkoutConfig {
 	rounds: number;
 }
 
-export type PresetId = 'amateur' | 'pro-6' | 'pro-8' | 'pro-12' | 'womens-pro' | 'fitness';
+export type PresetId =
+	| 'seniors'
+	| 'juniors'
+	| 'upper-mini'
+	| 'lower-mini'
+	| 'group-class'
+	| 'private-lesson';

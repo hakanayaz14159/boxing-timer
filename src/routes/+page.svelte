@@ -12,7 +12,7 @@
 </script>
 
 <main class="page" data-phase={phase}>
-	<!-- Full presence while configuring; recedes behind the digits once they appear. -->
+	<!-- Full presence while configuring; dimmed once a round is running. -->
 	<BackgroundBranding dimmed={!isConfiguring} />
 
 	<!-- Theme and language controls leave with the config screen; the header row
@@ -36,18 +36,18 @@
 
 <style>
 	/*
-	 * One grid owns every region. Each child is assigned a named area, so nothing
-	 * is absolutely positioned over anything else and there is no stacking of
-	 * media-query overrides to get wrong.
+	 * One grid owns every region. The mark is the exception: it is taken out of
+	 * the grid so a corner watermark cannot change the rows.
 	 */
 	.page {
+		position: relative;
+		isolation: isolate;
 		display: grid;
 		grid-template-areas:
 			'header'
 			'stage'
-			'controls'
-			'brand';
-		grid-template-rows: auto minmax(0, 1fr) auto auto;
+			'controls';
+		grid-template-rows: auto minmax(0, 1fr) auto;
 		gap: var(--sp-3);
 		height: 100svh;
 		padding: var(--sp-3) var(--sp-4);
@@ -65,11 +65,8 @@
 		background: var(--color-bg-rest);
 	}
 
-	/* Shares the cell with the branding watermark, and sits above it. */
 	.stage {
 		grid-area: stage;
-		position: relative;
-		z-index: 1;
 		display: grid;
 		grid-template-rows: minmax(0, 1fr);
 		min-height: 0;
@@ -82,7 +79,6 @@
 
 	.controls {
 		grid-area: controls;
-		z-index: 1;
 		min-width: 0;
 	}
 

@@ -7,51 +7,51 @@ export interface Preset {
 
 export const BOXING_PRESETS: readonly Preset[] = [
 	{
-		id: 'amateur',
+		id: 'seniors',
 		config: {
 			exerciseSeconds: 3 * 60,
-			restSeconds: 1 * 60,
+			restSeconds: 60,
 			rounds: 3
 		}
 	},
 	{
-		id: 'pro-6',
+		id: 'juniors',
 		config: {
-			exerciseSeconds: 3 * 60,
-			restSeconds: 1 * 60,
-			rounds: 6
+			exerciseSeconds: 2 * 60,
+			restSeconds: 60,
+			rounds: 3
 		}
 	},
 	{
-		id: 'pro-8',
+		id: 'upper-mini',
 		config: {
-			exerciseSeconds: 3 * 60,
-			restSeconds: 1 * 60,
-			rounds: 8
+			exerciseSeconds: 90,
+			restSeconds: 60,
+			rounds: 3
 		}
 	},
 	{
-		id: 'pro-12',
+		id: 'lower-mini',
+		config: {
+			exerciseSeconds: 60,
+			restSeconds: 60,
+			rounds: 3
+		}
+	},
+	{
+		id: 'group-class',
 		config: {
 			exerciseSeconds: 3 * 60,
-			restSeconds: 1 * 60,
+			restSeconds: 60,
+			rounds: 15
+		}
+	},
+	{
+		id: 'private-lesson',
+		config: {
+			exerciseSeconds: 2 * 60,
+			restSeconds: 60,
 			rounds: 12
-		}
-	},
-	{
-		id: 'womens-pro',
-		config: {
-			exerciseSeconds: 2 * 60,
-			restSeconds: 1 * 60,
-			rounds: 10
-		}
-	},
-	{
-		id: 'fitness',
-		config: {
-			exerciseSeconds: 2 * 60,
-			restSeconds: 30,
-			rounds: 5
 		}
 	}
 ];

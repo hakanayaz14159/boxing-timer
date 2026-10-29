@@ -30,12 +30,12 @@
 		"previewBellTitle": "Raunt zilini dinle"
 	},
 	"presets": {
-		"amateur": "Amatör",
-		"pro-6": "Pro 6",
-		"pro-8": "Pro 8",
-		"pro-12": "Pro 12",
-		"womens-pro": "Kadınlar Pro",
-		"fitness": "Fitness"
+		"seniors": "Büyükler, U23, Gençler",
+		"juniors": "Yıldızlar",
+		"upper-mini": "Üst Minik",
+		"lower-mini": "Alt Minik",
+		"group-class": "Grup Dersi",
+		"private-lesson": "Özel Ders"
 	},
 	"timer": {
 		"getReady": "Hazır Ol",

@@ -2,7 +2,7 @@
 	import logo from '$lib/assets/no-bg-logo.png';
 
 	interface Props {
-		/** Recede behind the countdown while a round is running. */
+		/** Dim once a round is running so the digits stay dominant. */
 		dimmed: boolean;
 	}
 
@@ -10,9 +10,8 @@
 </script>
 
 <!--
-	`display: contents` so the page grid places these two pieces directly: the
-	watermark shares the stage cell with the countdown, the wordmark gets a row of
-	its own. Neither is absolutely positioned, so neither can land on a control.
+	Out of the page grid. A corner watermark, behind the content, so it cannot
+	change the header, the clock, or the controls.
 -->
 <div class="branding" aria-hidden="true">
 	<div class="watermark" class:watermark--dimmed={dimmed}>
@@ -24,7 +23,7 @@
 				aria-hidden="true"
 			>
 				<defs>
-					<path id="arch-path" d="M 6,50 A 44,44 0 0 1 94,50" />
+					<path id="arch-path" d="M 14,75.2 A 44,44 0 1 1 86,75.2" />
 				</defs>
 				<text class="arch-text">
 					<textPath href="#arch-path" startOffset="50%" text-anchor="middle">
@@ -35,26 +34,20 @@
 			<img src={logo} alt="" class="logo" />
 		</div>
 	</div>
-
-	<div class="wordmark">AHMET TAŞÇI</div>
 </div>
 
 <style>
 	.branding {
-		display: contents;
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: -1;
+		padding-top: env(safe-area-inset-top, 0);
+		pointer-events: none;
 	}
 
-	/* Spans every row so the mark is centred on the page rather than on one
-	   region, and sits behind all content. */
 	.watermark {
-		grid-row: 1 / -1;
-		grid-column: 1 / -1;
-		display: grid;
-		place-items: center;
-		min-width: 0;
-		min-height: 0;
-		opacity: 0.4;
-		pointer-events: none;
+		opacity: 0.92;
 		transition: opacity var(--motion-slow) var(--ease);
 	}
 
@@ -63,16 +56,21 @@
 	 * the digits, read from several metres away, stay the dominant element.
 	 */
 	.watermark--dimmed {
-		opacity: 0.22;
+		opacity: 0.75;
 	}
 
 	.unit {
+		container-type: inline-size;
 		position: relative;
 		display: grid;
 		place-items: center;
-		width: min(92vmin, 60rem);
+		/* 8% margin: the arch glyphs extend past the viewBox, and the corner
+		   would clip them otherwise. */
+		--mark: clamp(12rem, 40vmin, 22rem);
+		width: var(--mark);
+		margin-top: calc(var(--mark) * 0.08);
+		margin-left: calc(var(--mark) * 0.08);
 		aspect-ratio: 1;
-		max-height: 100%;
 	}
 
 	.arch {
@@ -83,11 +81,13 @@
 		overflow: visible;
 	}
 
+	/* Sized to the longer arch: big enough to read, still short enough that
+	   the whole phrase stays on the path. */
 	.arch-text {
 		font-family: var(--font-body);
-		font-size: 6px;
+		font-size: 2.5cqw;
 		font-weight: 700;
-		letter-spacing: 0.12em;
+		letter-spacing: 0.01em;
 		fill: var(--color-text-muted);
 	}
 
@@ -97,25 +97,15 @@
 		object-fit: contain;
 	}
 
-	.wordmark {
-		grid-area: brand;
-		padding-bottom: env(safe-area-inset-bottom, 0);
-		font-size: clamp(1rem, 4vmin, 1.75rem);
-		font-weight: 600;
-		letter-spacing: 0.18em;
-		text-align: center;
-		color: var(--color-text-muted);
+	@media (max-width: 800px) {
+		.unit {
+			--mark: min(22rem, 46vw);
+		}
 	}
 
 	@media (max-height: 500px) {
-		.wordmark {
-			font-size: var(--text-sm);
-			letter-spacing: 0.12em;
-		}
-
-		.arch-text {
-			font-size: 5.25px;
-			letter-spacing: 0.09em;
+		.unit {
+			--mark: min(14rem, 36svh);
 		}
 	}
 </style>

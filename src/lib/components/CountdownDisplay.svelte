@@ -32,7 +32,10 @@
 	</div>
 
 	{#if showClock}
-		<div class="progress" style:--progress={progress}></div>
+		<div class="progress-block">
+			<div class="wordmark" aria-hidden="true">AHMET TAŞÇI</div>
+			<div class="progress" style:--progress={progress}></div>
+		</div>
 	{/if}
 </div>
 
@@ -94,33 +97,31 @@
 		}
 	}
 
-	/* Spare desktop height: leave the watermark readable above a slightly smaller clock. */
-	@media (min-width: 1024px) and (min-height: 501px) {
-		.clock {
-			grid-template-areas:
-				'.'
-				'readout'
-				'progress';
-			grid-template-rows: minmax(0, 2fr) auto minmax(0, 1fr);
-		}
-
-		.readout {
-			grid-area: readout;
-			font-size: min(25cqw, 50cqh);
-		}
-
-		.word {
-			font-size: min(calc(110cqw / var(--chars, 1)), 48cqh);
-		}
-
-		.progress {
-			grid-area: progress;
-			align-self: end;
-		}
-	}
-
 	.clock--paused .readout {
 		opacity: 0.5;
+	}
+
+	.progress-block {
+		display: grid;
+		justify-items: center;
+		justify-self: stretch;
+		gap: var(--sp-2);
+		width: 100%;
+	}
+
+	.wordmark {
+		font-size: clamp(1rem, 4vmin, 1.75rem);
+		font-weight: 600;
+		letter-spacing: 0.18em;
+		text-align: center;
+		color: var(--color-text-muted);
+	}
+
+	@media (max-height: 500px) {
+		.wordmark {
+			font-size: var(--text-sm);
+			letter-spacing: 0.12em;
+		}
 	}
 
 	.progress {
