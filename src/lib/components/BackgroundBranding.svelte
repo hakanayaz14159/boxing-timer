@@ -66,7 +66,7 @@
 		place-items: center;
 		/* 8% margin: the arch glyphs extend past the viewBox, and the corner
 		   would clip them otherwise. */
-		--mark: clamp(12rem, 40vmin, 22rem);
+		--mark: clamp(11rem, 32vmin, 18rem);
 		width: var(--mark);
 		margin-top: calc(var(--mark) * 0.08);
 		margin-left: calc(var(--mark) * 0.08);
@@ -99,13 +99,13 @@
 
 	@media (max-width: 800px) {
 		.unit {
-			--mark: min(22rem, 46vw);
+			--mark: min(18rem, 38vw);
 		}
 	}
 
 	@media (max-height: 500px) {
 		.unit {
-			--mark: min(14rem, 36svh);
+			--mark: min(12rem, 30svh);
 		}
 	}
 </style>

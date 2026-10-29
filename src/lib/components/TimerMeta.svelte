@@ -85,7 +85,7 @@
 		align-items: baseline;
 		gap: var(--sp-3);
 		font-family: var(--font-display);
-		font-size: clamp(3.25rem, 12vmin, 7.5rem);
+		font-size: clamp(2.9rem, 10.5vmin, 6.5rem);
 		font-weight: 700;
 		font-variant-numeric: tabular-nums;
 		line-height: 0.9;
